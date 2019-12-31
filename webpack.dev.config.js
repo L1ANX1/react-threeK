@@ -1,4 +1,6 @@
 const path = require('path');
+const srcRoot = './src';
+
 module.exports = {
   /** 入口 */
   entry: path.join(__dirname, 'src/index.js'),
@@ -8,5 +10,15 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: 'bundle.min.js'
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(js|jsx)$/,
+        use: ['babel-loader?cacheDirectory=true'],
+        include: path.resolve(__dirname, 'src')
+      }
+      // { test: /\.(js|jsx)$/, use: [{ loader: 'babel-loader' }], include: path.resolve(srcRoot) }
+    ]
   }
 };

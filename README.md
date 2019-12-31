@@ -47,3 +47,34 @@
    </body>
    </html>
    ```
+3. babel
+   babel-core 调用 Babel 的 API 进行转码
+   babel-loader
+   babel-preset-es2015 用于解析 ES6
+   babel-preset-react 用于解析 JSX
+   babel-preset-stage-0 用于解析 ES7 提案
+   npm install --save-dev babel-core babel-loader babel-preset-es2015 babel-preset-react babel-preset-stage-0
+   新建 babel 配置文件.babelrc
+   type nul.> .babelrc
+   ```
+   {
+   "presets": [
+     "es2015",
+     "react",
+     "stage-0"
+   ],
+   "plugins": []
+   }
+   ```
+   修改 webpack.dev.config.js，增加 babel-loader
+   ```
+    /*src文件夹下面的以.js结尾的文件，要使用babel解析*/
+    /*cacheDirectory是用来缓存编译结果，下次编译加速*/
+    module: {
+        rules: [{
+            test: /\.js$/,
+            use: ['babel-loader?cacheDirectory=true'],
+            include: path.join(__dirname, 'src')
+        }]
+    }
+   ```
