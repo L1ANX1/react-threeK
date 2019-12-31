@@ -1,0 +1,24 @@
+{
+  "name": "react-threejs",
+  "version": "1.0.0",
+  "description": "build a react-threejs project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "webpack": "webpack --config webpack.dev.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/L1ANX1/react-threejs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/L1ANX1/react-threejs/issues"
+  },
+  "homepage": "https://github.com/L1ANX1/react-threejs#readme",
+  "devDependencies": {
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
+  }
+}
