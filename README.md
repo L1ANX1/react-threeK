@@ -43,7 +43,7 @@
    </head>
    <body>
    <div id="app"></div>
-   <script type="text/javascript" src="./bundle.js" charset="utf-8"></script>
+   <script type="text/javascript" src="./bundle.min.js" charset="utf-8"></script>
    </body>
    </html>
    ```
