@@ -56,6 +56,7 @@
     npm install --save-dev babel-core babel-loader babel-preset-es2015 babel-preset-react babel-preset-stage-0
     新建 babel 配置文件.babelrc
     type nul.> .babelrc
+
     ```
     {
     "presets": [
@@ -66,7 +67,9 @@
     "plugins": []
     }
     ```
+
     修改 webpack.dev.config.js，增加 babel-loader
+
     ```
      /*src文件夹下面的以.js结尾的文件，要使用babel解析*/
      /*cacheDirectory是用来缓存编译结果，下次编译加速*/
@@ -78,6 +81,46 @@
          }]
      }
     ```
+
         Module build failed (from ./node_modules/babel-loader/lib/index.js):
+
     Error: Cannot find module '@babel/core'
     babel-loader@8 requires Babel 7.x (the package '@babel/core'). If you'd like to use Babel 6.x ('babel-core'), you should install 'babel-loader@7'.
+
+4.  React
+    npm install --save react react-dom
+    修改 src/index.js 使用 react
+
+    ```
+    import React from 'react';
+    import ReactDom from 'react-dom';ReactDom.render(
+    <div>Hello React!</div>, document.getElementById('app'));
+    ```
+
+    组件化
+    cd src
+    mkdir component
+    cd component
+    mkdir Hello
+    cd Hello
+    type nul.>Hello.js
+
+    修改 src/index.js，引用 Hello 组件！
+    src/index.js
+
+    ```
+    import React from 'react';
+    import ReactDom from 'react-dom';
+    import Hello from './component/Hello/Hello';
+    ReactDom.render(<Hello/>, document.getElementById('app'));
+    ```
+
+5.  命令优化
+    package.json
+    ```
+    "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev-build": "webpack --config webpack.dev.config.js"
+    }
+    ```
+    npm run dev-build
