@@ -17,7 +17,7 @@
     ...
     };
     ```
-    c)使用 webpack 编译文件（webpack 需要安装全局 --g）
+    c)使用 webpack 编译文件（webpack 需要安装全局 --g 如果是直接执行 webpack --config webpack.dev.config.js webpack-cli 也需要全局安装）
     mkdir src
     type nul.> ./src/index.js
     ```
@@ -211,3 +211,72 @@
     这种路径了，不是我们想象中的路由那样的路径http://localhost:3000~我们需要配置一个简单的WEB服务器，指向index.html~有下面两种方法来实现
     a) Nginx, Apache, IIS 等配置启动一个简单的的 WEB 服务器。
     b) 使用 webpack-dev-server 来配置启动 WEB 服务器。
+
+7.  webpack-dev-server
+    简单来说，webpack-dev-server 就是一个小型的静态文件服务器。使用它，可以为 webpack 打包生成的资源文件提供 Web 服务
+    npm install webpack-dev-server --save-dev
+    webpack-dev-server 需要全局安装，要不后面用的时候要写相对路径。需要再执行这个 npm install webpack-dev-server -g
+    修改 webpack.dev.config.js,增加 webpack-dev-server 的配置。
+    webpack.dev.config.js
+
+    ```
+    devServer: {
+        contentBase: path.join(__dirname, './dist')
+    }
+    ```
+
+    webpack-dev-server --config webpack.dev.config.js
+    浏览器打开http://localhost:8080，OK,现在我们可以点击首页,Page1了，
+    看 URL 地址变化啦！我们看到 react-router 已经成功。
+    Q: --content-base 是什么？
+    A：URL 的根目录。如果不设定的话，默认指向项目根目录。
+    重要提示：webpack-dev-server 编译后的文件，都存储在内存中，我们并不能看见的。你可以删除之前遗留的文件 dist/bundle.js，
+    仍然能正常打开网站！
+    每次执行 webpack-dev-server --config webpack.dev.config.js,要打很长的命令，我们修改 package.json，增加 script->start:
+
+    ```
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev-build": "webpack --config webpack.dev.config.js",
+        "start": "webpack-dev-server --config webpack.dev.config.js"
+    }
+    ```
+
+    下次执行 npm start 就可以了。
+    webpack-dev-server，我们就看看它的其他的配置项。
+    看了之后，发现有几个我们可以用的。
+
+    - color（CLI only） console 中打印彩色日志-
+    - historyApiFallback 任意的 404 响应都被替代为 index.html。有什么用呢？你现在运行 npm start，然后打开浏览器，访问http://localhost:8080,然后点击Page1到链接http://localhost:8080/page1，然后刷新页面试试。是不是发现刷新后 404 了。为什么？dist 文件夹里面并没有 page1.html,当然会 404 了，所以我们需要配置 historyApiFallback，让所有的 404 定位到 index.html。-
+    - host 指定一个 host,默认是 localhost。如果你希望服务器外部可以访问，指定如下：host: "0.0.0.0"。比如你用手机通过 IP 访问。-
+    - hot 启用 Webpack 的模块热替换特性。-
+    - port 配置要监听的端口。默认就是我们现在使用的 8080 端口。-
+    - proxy 代理。比如在 localhost:3000 上有后端服务的话，你可以这样启用代理：
+
+    ```
+    proxy: {"/api": "http://localhost:3000"}
+    ```
+
+    progress（CLI only） 将编译进度输出到控制台。
+
+    根据这几个配置，修改下我们的 webpack-dev-server 的配置~
+    webpack.dev.config.js
+
+    ```
+    devServer: {
+        port: 8080,
+        contentBase: path.join(__dirname, './dist'),
+        historyApiFallback: true,
+        host: '0.0.0.0'
+    }
+    ```
+
+    CLI ONLY 的需要在命令行中配置
+    package.json
+
+    ```
+    "start": "webpack-dev-server --config webpack.dev.config.js --color --progress"
+    ```
+
+    现在我们执行 npm start 看看效果。是不是看到打包的时候有百分比进度？在http://localhost:8080/page1页面刷新是不是没问题了？
+    用手机通过局域网 IP 是否可以访问到网站？ no idea
