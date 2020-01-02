@@ -8,15 +8,21 @@ module.exports = {
   // entry:path.resolve(srcRoot,'./page/index/index.js'),
   /** 输出到dist文件夹，输出文件名滋味bundle.min.js */
   output: {
-    path: path.resolve(__dirname, './dist'),
+    path: path.join(__dirname, './dist'),
     filename: 'bundle.min.js'
+  },
+  devServer: {
+    port: 8080,
+    contentBase: path.join(__dirname, './dist'),
+    historyApiFallback: true,
+    host: '0.0.0.0'
   },
   module: {
     rules: [
       {
         test: /\.(js|jsx)$/,
         use: ['babel-loader?cacheDirectory=true'],
-        include: path.resolve(__dirname, 'src')
+        include: path.join(__dirname, 'src')
       }
       // { test: /\.(js|jsx)$/, use: [{ loader: 'babel-loader' }], include: path.resolve(srcRoot) }
     ]
