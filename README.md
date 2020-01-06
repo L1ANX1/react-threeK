@@ -280,3 +280,86 @@
 
     现在我们执行 npm start 看看效果。是不是看到打包的时候有百分比进度？在http://localhost:8080/page1页面刷新是不是没问题了？
     用手机通过局域网 IP 是否可以访问到网站？ no idea
+
+8.  模块热替换（Hot Module Replacement）
+    package.json 增加 --hot
+    "start": "webpack-dev-server --config webpack.dev.config.js --color --progress --hot"
+    或
+    const webpack = require('webpack');
+    devServer: {
+    hot: true
+    }
+    plugins:[
+    new webpack.HotModuleReplacementPlugin()
+    ]
+
+    src/index.js 增加 module.hot.accept(),如下。当模块更新的时候，通知 index.js。
+    src/index.js
+
+    ```
+    import React from 'react';
+    import ReactDom from 'react-dom';
+    import getRouter from './router/router';
+    if (module.hot) {
+        module.hot.accept();
+    }
+    ReactDom.render(
+        getRouter(), document.getElementById('app'));
+    ```
+
+    Q:　请问 webpack-dev-server 与 react-hot-loader 两者的热替换有什么区别？
+    A: 区别在于 webpack-dev-server 自己的--hot 模式只能即时刷新页面，但状态保存不住。因为 React 有一些自己语法(JSX)是 HotModuleReplacementPlugin 搞不定的。
+    而 react-hot-loader 在--hot 基础上做了额外的处理，来保证状态可以存下来。
+
+    安装依赖
+    npm install react-hot-loader@next --save-dev
+
+    根据文档，要做如下几个修改~
+    .babelrc 增加 react-hot-loader/babel
+    .babelrc
+
+    ```
+    {
+    "presets": [
+        "es2015",
+        "react",
+        "stage-0"
+    ],
+    "plugins": [
+        "react-hot-loader/babel"
+    ]
+    }
+    ```
+
+    webpack.dev.config.js 入口增加 react-hot-loader/patch
+    webpack.dev.config.js
+    entry: [
+    'react-hot-loader/patch',
+    path.join(__dirname, 'src/index.js')
+    ]
+    src/index.js 修改如下
+    src/index.js
+
+    ```
+    import React from 'react';
+    import ReactDom from 'react-dom';
+    import {AppContainer} from 'react-hot-loader';
+    import getRouter from './router/router';
+    /*初始化*/
+    renderWithHotReload(getRouter());
+    /*热更新*/
+    if (module.hot) {
+        module.hot.accept('./router/router', () => {
+            const getRouter = require('./router/router').default;
+            renderWithHotReload(getRouter());
+        });
+    }
+    function renderWithHotReload(RootElement) {
+        ReactDom.render(
+            <AppContainer>
+                {RootElement}
+            </AppContainer>,
+            document.getElementById('app')
+        )
+    }
+    ```
