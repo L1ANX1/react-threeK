@@ -363,20 +363,3 @@
         )
     }
     ```
-
-9.  文件路径优化
-    webpack 提供了一个别名配置，就是我们无论在哪个路径下，引用都可以这样
-    import Home from 'pages/Home/Home';
-    修改 webpack.dev.config.js，增加别名~
-    webpack.dev.config.js
-
-````
-    resolve: {
-        alias: {
-            pages: path.join(__dirname, 'src/pages'),
-            component: path.join(__dirname, 'src/component'),
-            router: path.join(__dirname, 'src/router')
-        }
-    }
-    ```
-````
