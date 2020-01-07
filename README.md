@@ -7,7 +7,7 @@
 2.  webpack
     a) npm install --save-dev webpack@3
     Q: 什么时候用--save-dev，什么时候用--save？A: --save-dev 是你开发时候依赖的东西，--save 是你发布之后还依赖的东西。
-    b) type nul.> webpack.dev.config.js
+    b) type nul.> webpack.dev.config.js (type nul.> === touch)
     ```
     const path = require('path');
     module.exports = {
@@ -526,7 +526,7 @@
     写一个 Counter 页面
     cd src/pages
     mkdir Counter
-    touch Counter/Counter.js
+    type nul.> Counter/Counter.js
 
     src/pages/Counter/Counter.js
 
@@ -672,3 +672,213 @@
     ```
 
     到这里我们就可以执行 npm start，打开 localhost:8080/counter 看效果了。
+
+
+    异步action
+    调用一个异步get请求去后台请求数据：
+    -请求开始的时候，界面转圈提示正在加载。isLoading置为true。-
+    -请求成功，显示数据。isLoading置为false,data填充数据。-
+    -请求失败，显示失败。isLoading置为false，显示错误信息。-
+    下面，我们以向后台请求用户基本信息为例。
+    我们先创建一个user.json，等会请求用，相当于后台的API接口。
+    cd dist
+    mkdir api
+    cd api
+    type nul.> user.json
+    dist/api/user.json
+    {
+    "name": "brickspert",
+    "intro": "please give me a star"
+    }
+    创建必须的action创建函数。
+    cd src/redux/actions
+    type nul.> userInfo.js
+    src/redux/actions/userInfo.js
+
+    ```
+    export const GET_USER_INFO_REQUEST = "userInfo/GET_USER_INFO_REQUEST";
+    export const GET_USER_INFO_SUCCESS = "userInfo/GET_USER_INFO_SUCCESS";
+    export const GET_USER_INFO_FAIL = "userInfo/GET_USER_INFO_FAIL";
+    function getUserInfoRequest() {
+        return {
+            type: GET_USER_INFO_REQUEST
+        }
+    }
+    function getUserInfoSuccess(userInfo) {
+        return {
+            type: GET_USER_INFO_SUCCESS,
+            userInfo: userInfo
+        }
+    }
+    function getUserInfoFail() {
+        return {
+            type: GET_USER_INFO_FAIL
+        }
+    }
+    ```
+
+    创建了请求中，请求成功，请求失败三个action创建函数。
+    创建reducer
+    再强调下，reducer是根据state和action生成新state的纯函数。
+    cd src/redux/reducers
+    type nul.> userInfo.js
+    src/redux/reducers/userInfo.js
+    ```
+    import {GET_USER_INFO_REQUEST, GET_USER_INFO_SUCCESS, GET_USER_INFO_FAIL} from '@actions/userInfo';
+    const initState = {
+        isLoading: false,
+        userInfo: {},
+        errorMsg: ''
+    };
+    export default function reducer(state = initState, action) {
+        switch (action.type) {
+            case GET_USER_INFO_REQUEST:
+                return {
+                    ...state,
+                    isLoading: true,
+                    userInfo: {},
+                    errorMsg: ''
+                };
+            case GET_USER_INFO_SUCCESS:
+                return {
+                    ...state,
+                    isLoading: false,
+                    userInfo: action.userInfo,
+                    errorMsg: ''
+                };
+            case GET_USER_INFO_FAIL:
+                return {
+                    ...state,
+                    isLoading: false,
+                    userInfo: {},
+                    errorMsg: '请求错误'
+                };
+            default:
+                return state;
+        }
+    }
+    ```
+
+    组合reducer
+    src/redux/reducers.js
+
+    ```
+    import counter from '@reducers/counter';
+    import userInfo from '@reducers/userInfo';
+    export default function combineReducers(state = {}, action) {
+        return {
+            counter: counter(state.counter, action),
+            userInfo: userInfo(state.userInfo, action)
+        }
+    }
+    ```
+
+    现在有了action，有了reducer，我们就需要调用把action里面的三个action函数和网络请求结合起来。
+    请求中 dispatch getUserInfoRequest
+    请求成功 dispatch getUserInfoSuccess
+    请求失败 dispatch getUserInfoFail
+    src/redux/actions/userInfo.js增加
+    ```
+    export function getUserInfo() {
+        return function (dispatch) {
+            dispatch(getUserInfoRequest());
+            return fetch('http://localhost:8080/api/user.json')
+                .then((response => {
+                    return response.json()
+                }))
+                .then((json) => {
+                        dispatch(getUserInfoSuccess(json))
+                    }
+                ).catch(
+                    () => {
+                        dispatch(getUserInfoFail());
+                    }
+                )
+        }
+    }
+    ```
+
+    让action创建函数除了返回action对象外，还可以返回函数，我们需要引用redux-thunk。
+    npm install --save redux-thunk
+    这里涉及到redux中间件middleware。
+    简单的说，中间件就是action在到达reducer，先经过中间件处理。我们之前知道reducer能处理的action只有这样的{type:xxx}，所以我们使用中间件来处理
+    函数形式的action，把他们转为标准的action给reducer。这是redux-thunk的作用。
+    使用redux-thunk中间件
+    我们来引入redux-thunk中间件
+    src/redux/store.js
+
+    ```
+    import {createStore, applyMiddleware} from 'redux';
+    import thunkMiddleware from 'redux-thunk';
+    import combineReducers from './reducers.js';
+    let store = createStore(combineReducers, applyMiddleware(thunkMiddleware));
+    export default store;
+    ```
+
+    到这里，redux这边OK了，我们来写个组件验证下。
+    cd src/pages
+    mkdir UserInfo
+    cd UserInfo
+    type nul.> UserInfo.js
+    src/pages/UserInfo/UserInfo.js
+
+    ```
+    import React, {Component} from 'react';
+    import {connect} from 'react-redux';
+    import {getUserInfo} from "@actions/userInfo";
+    class UserInfo extends Component {
+        render() {
+            const {userInfo, isLoading, errorMsg} = this.props.userInfo;
+            return (
+                <div>
+                    {
+                        isLoading ? '请求信息中......' :
+                            (
+                                errorMsg ? errorMsg :
+                                    <div>
+                                        <p>用户信息：</p>
+                                        <p>用户名：{userInfo.name}</p>
+                                        <p>介绍：{userInfo.intro}</p>
+                                    </div>
+                            )
+                    }
+                    <button onClick={() => this.props.getUserInfo()}>请求用户信息</button>
+                </div>
+            )
+        }
+    }
+    export default connect((state) => ({userInfo: state.userInfo}), {getUserInfo})(UserInfo);
+    ```
+    connect参数写法不一样了，mapStateToProps函数用了es6简写，mapDispatchToProps用了react-redux提供的简单写法。
+    增加路由
+    src/router/router.js
+    ```
+    import React from 'react';
+
+    import {BrowserRouter as Router, Route, Switch, Link} from 'react-router-dom';
+
+    import Home from '@pages/Home/Home';
+    import Page1 from '@pages/Page1/Page1';
+    import Counter from '@pages/Counter/Counter';
+    import UserInfo from '@pages/UserInfo/UserInfo';
+
+    const getRouter = () => (
+        <Router>
+            <div>
+                <ul>
+                    <li><Link to="/">首页</Link></li>
+                    <li><Link to="/page1">Page1</Link></li>
+                    <li><Link to="/counter">Counter</Link></li>
+                    <li><Link to="/userinfo">UserInfo</Link></li>
+                </ul>
+                <Switch>
+                    <Route exact path="/" component={Home}/>
+                    <Route path="/page1" component={Page1}/>
+                    <Route path="/counter" component={Counter}/>
+                    <Route path="/userinfo" component={UserInfo}/>
+                </Switch>
+            </div>
+        </Router>
+    );
+    export default getRouter;
+    ```
