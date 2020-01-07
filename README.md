@@ -5,7 +5,7 @@
 1.  init 项目基本信息
     npm init(生成 package.json)
 2.  webpack
-    a) npm install --save-dev webpack
+    a) npm install --save-dev webpack@3
     Q: 什么时候用--save-dev，什么时候用--save？A: --save-dev 是你开发时候依赖的东西，--save 是你发布之后还依赖的东西。
     b) type nul.> webpack.dev.config.js
     ```
@@ -214,7 +214,7 @@
 
 7.  webpack-dev-server
     简单来说，webpack-dev-server 就是一个小型的静态文件服务器。使用它，可以为 webpack 打包生成的资源文件提供 Web 服务
-    npm install webpack-dev-server --save-dev
+    npm install webpack-dev-server@2 --save-dev
     webpack-dev-server 需要全局安装，要不后面用的时候要写相对路径。需要再执行这个 npm install webpack-dev-server -g
     修改 webpack.dev.config.js,增加 webpack-dev-server 的配置。
     webpack.dev.config.js
@@ -312,7 +312,7 @@
     而 react-hot-loader 在--hot 基础上做了额外的处理，来保证状态可以存下来。
 
     安装依赖
-    npm install react-hot-loader@next --save-dev
+    npm install react-hot-loader --save-dev
 
     根据文档，要做如下几个修改~
     .babelrc 增加 react-hot-loader/babel
@@ -379,3 +379,296 @@
         }
     }
     ```
+
+10. Redux
+    先安装 redux
+    npm install --save redux
+
+    初始化目录结构
+    cd src
+    mkdir redux
+    cd redux
+    mkdir actions
+    mkdir reducers
+    type nul.> reducers.js
+    type nul.> store.js
+    type nul.> actions/counter.js
+    type nul.> reducers/counter.js
+
+    先来写 action 创建函数。通过 action 创建函数，可以创建 action~
+    src/redux/actions/counter.js
+
+    ```
+    /*action*/
+    export const INCREMENT = "counter/INCREMENT";
+    export const DECREMENT = "counter/DECREMENT";
+    export const RESET = "counter/RESET";
+    export function increment() {
+        return {type: INCREMENT}
+    }
+    export function decrement() {
+        return {type: DECREMENT}
+    }
+    export function reset() {
+        return {type: RESET}
+    }
+    ```
+
+    再来写 reducer,reducer 是一个纯函数，接收 action 和旧的 state,生成新的 state.
+    src/redux/reducers/counter.js
+
+    ```
+    import {INCREMENT, DECREMENT, RESET} from '../actions/counter';
+    /** 初始化state */
+    const initState = {
+        count: 0
+    };
+    /** reducer */
+    export default function reducer(state = initState, action) {
+        switch (action.type) {
+            case INCREMENT:
+                return {
+                    count: state.count + 1
+                };
+            case DECREMENT:
+                return {
+                    count: state.count - 1
+                };
+            case RESET:
+                return {count: 0};
+            default:
+                return state
+        }
+    }
+    ```
+
+    一个项目有很多的 reducers,我们要把他们整合到一起
+    src/redux/reducers.js
+
+    ```
+    import counter from './reducers/counter';
+    export default function combineReducers(state = {}, action) {
+        return {
+            counter: counter(state.counter, action)
+        }
+    }
+    ```
+
+    到这里，我们必须再理解下一句话。
+    reducer 就是纯函数，接收 state 和 action，然后返回一个新的 state。
+    看看上面的代码，无论是 combineReducers 函数也好，还是 reducer 函数也好，都是接收 state 和 action，
+    返回更新后的 state。区别就是 combineReducers 函数是处理整棵树，reducer 函数是处理树的某一点。
+
+    接下来，我们要创建一个 store。
+    前面我们可以使用 action 来描述“发生了什么”，使用 action 创建函数来返回 action。
+    还可以使用 reducers 来根据 action 更新 state 。
+    那我们如何提交 action？提交的时候，怎么才能触发 reducers 呢？
+    store 就是把它们联系到一起的对象。store 有以下职责：
+    维持应用的 state；
+    提供 getState() 方法获取 state；
+    提供 dispatch(action) 触发 reducers 方法更新 state；
+    通过 subscribe(listener) 注册监听器;
+    通过 subscribe(listener) 返回的函数注销监听器。
+    src/redux/store.js
+
+    ```
+    import {createStore} from 'redux';
+    import combineReducers from './reducers.js';
+    let store = createStore(combineReducers);
+    export default store;
+    ```
+
+    到现在为止，我们已经可以使用 redux 了~
+    下面我们就简单的测试下
+    cd src
+    cd redux
+    type nul.> testRedux.js
+    src/redux/testRedux.js
+
+    ```
+    import {increment, decrement, reset} from './actions/counter';
+    import store from './store';
+    // 打印初始状态
+    console.log(store.getState());
+    // 每次 state 更新时，打印日志
+    // 注意 subscribe() 返回一个函数用来注销监听器
+    let unsubscribe = store.subscribe(() =>
+        console.log(store.getState())
+    );
+    // 发起一系列 action
+    store.dispatch(increment());
+    store.dispatch(decrement());
+    store.dispatch(reset());
+    // 停止监听 state 更新
+    unsubscribe();
+    ```
+
+    该测试，说明 redux 和 react 没关系
+    redux 的数据流，看看这里。
+    http://cn.redux.js.org/docs/basics/DataFlow.html -调用 store.dispatch(action)提交 action。-
+    -redux store 调用传入的 reducer 函数。把当前的 state 和 action 传进去。- -根 reducer 应该把多个子 reducer 输出合并成一个单一的 state 树。-
+    -Redux store 保存了根 reducer 返回的完整 state 树。-
+
+    webpack.dev.config.js 路径别名增加一下，后面好写了。
+    webpack.dev.config.js
+
+    ```
+    alias: {
+        ...
+        @actions: path.join(__dirname, 'src/redux/actions'),
+        @reducers: path.join(__dirname, 'src/redux/reducers'),
+        @redux: path.join(__dirname, 'src/redux')
+    }
+    ```
+
+    把前面的相对路径都改改。
+    下面我们开始搭配 react 使用。
+    写一个 Counter 页面
+    cd src/pages
+    mkdir Counter
+    touch Counter/Counter.js
+
+    src/pages/Counter/Counter.js
+
+    ```
+    import React, {Component} from 'react';
+    export default class Counter extends Component {
+        render() {
+            return (
+                <div>
+                    <div>当前计数为(显示redux计数)</div>
+                    <button onClick={() => {
+                        console.log('调用自增函数');
+                    }}>自增
+                    </button>
+                    <button onClick={() => {
+                        console.log('调用自减函数');
+                    }}>自减
+                    </button>
+                    <button onClick={() => {
+                        console.log('调用重置函数');
+                    }}>重置
+                    </button>
+                </div>
+            )
+        }
+    }
+    ```
+
+    修改路由，增加 Counter
+    src/router/router.js
+
+    ```
+    import React from 'react';
+    import {BrowserRouter as Router, Route, Switch, Link} from 'react-router-dom';
+    import Home from 'pages/Home/Home';
+    import Page1 from 'pages/Page1/Page1';
+    import Counter from 'pages/Counter/Counter';
+    const getRouter = () => (
+        <Router>
+            <div>
+                <ul>
+                    <li><Link to="/">首页</Link></li>
+                    <li><Link to="/page1">Page1</Link></li>
+                    <li><Link to="/counter">Counter</Link></li>
+                </ul>
+                <Switch>
+                    <Route exact path="/" component={Home}/>
+                    <Route path="/page1" component={Page1}/>
+                    <Route path="/counter" component={Counter}/>
+                </Switch>
+            </div>
+        </Router>
+    );
+    export default getRouter;
+    ```
+
+    npm start 看看效果。
+    下一步，我们让 Counter 组件和 Redux 联合起来。使 Counter 能获得到 Redux 的 state，并且能发射 action。
+    当然我们可以使用刚才测试 testRedux 的方法，手动监听~手动引入 store~但是这肯定很麻烦哦。
+    react-redux 提供了一个方法 connect。
+    容器组件就是使用 store.subscribe() 从 Redux state 树中读取部分数据，并通过 props 来把这些数据提供给要渲染的组件。你可以手工来开发容器组件，但建议使用 React Redux 库的 connect() 方法来生成，这个方法做了性能优化来避免很多不必要的重复渲染。
+    connect 接收两个参数，一个 mapStateToProps,就是把 redux 的 state，转为组件的 Props，还有一个参数是 mapDispatchToprops,
+    就是把发射 actions 的方法，转为 Props 属性函数。
+    先来安装 react-redux
+    npm install --save react-redux
+    src/pages/Counter/Counter.js
+
+    ```
+    import React, {Component} from 'react';
+    import {increment, decrement, reset} from 'actions/counter';
+    import {connect} from 'react-redux';
+    class Counter extends Component {
+        render() {
+            return (
+                <div>
+                    <div>当前计数为{this.props.counter.count}</div>
+                    <button onClick={() => this.props.increment()}>自增
+                    </button>
+                    <button onClick={() => this.props.decrement()}>自减
+                    </button>
+                    <button onClick={() => this.props.reset()}>重置
+                    </button>
+                </div>
+            )
+        }
+    }
+    const mapStateToProps = (state) => {
+        return {
+            counter: state.counter
+        }
+    };
+    const mapDispatchToProps = (dispatch) => {
+        return {
+            increment: () => {
+                dispatch(increment())
+            },
+            decrement: () => {
+                dispatch(decrement())
+            },
+            reset: () => {
+                dispatch(reset())
+            }
+        }
+    };
+    export default connect(mapStateToProps, mapDispatchToProps)(Counter);
+    ```
+
+    下面我们要传入 store
+    所有容器组件都可以访问 Redux store，所以可以手动监听它。一种方式是把它以 props 的形式传入到所有容器组件中。但这太麻烦了，因为必须要用 store 把展示组件包裹一层，仅仅是因为恰好在组件树中渲染了一个容器组件。
+    建议的方式是使用指定的 React Redux 组件 来 魔法般的 让所有容器组件都可以访问 store，而不必显示地传递它。只需要在渲染根组件时使用即可。
+    src/index.js
+
+    ```
+    import React from 'react';
+    import ReactDom from 'react-dom';
+    import {AppContainer} from 'react-hot-loader';
+    import {Provider} from 'react-redux';
+    import store from './redux/store';
+
+    import getRouter from 'router/router';
+
+    /*初始化*/
+    renderWithHotReload(getRouter());
+
+    /*热更新*/
+    if (module.hot) {
+        module.hot.accept('./router/router', () => {
+            const getRouter = require('@router/router').default;
+            renderWithHotReload(getRouter());
+        });
+    }
+
+    function renderWithHotReload(RootElement) {
+        ReactDom.render(
+            <AppContainer>
+                <Provider store={store}>
+                    {RootElement}
+                </Provider>
+            </AppContainer>,
+            document.getElementById('app')
+        )
+    }
+    ```
+
+    到这里我们就可以执行 npm start，打开 localhost:8080/counter 看效果了。
