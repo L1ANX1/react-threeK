@@ -1,12 +1,14 @@
 const path = require('path');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var webpack = require('webpack');
 
 module.exports = {
   devtool: 'inline-source-map',
   /** 入口 */
-  entry: ['react-hot-loader/patch', path.join(__dirname, 'src/index.js')],
-  // entry: [    './app.js'  ],
-  // entry:path.resolve(srcRoot,'./page/index/index.js'),
+  entry: {
+    app: ['react-hot-loader/patch', path.join(__dirname, 'src/index.js')],
+    vendor: ['react', 'react-router-dom', 'redux', 'react-dom', 'react-redux']
+  },
   /** 输出到dist文件夹，输出文件名滋味bundle.min.js */
   output: {
     path: path.join(__dirname, './dist'),
@@ -54,5 +56,10 @@ module.exports = {
       }
     ]
   },
-  plugins: [new HtmlWebpackPlugin({ filename: 'index.html', template: path.join(__dirname, 'src/index.html') })]
+  plugins: [
+    new HtmlWebpackPlugin({ filename: 'index.html', template: path.join(__dirname, 'src/index.html') }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor'
+    })
+  ]
 };

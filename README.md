@@ -12,9 +12,12 @@
     const path = require('path');
     module.exports = {
     /_入口_/
-    ...
+     entry: path.join(__dirname, 'src/index.js'),
     /_输出到 dist 文件夹，输出文件名字为 bundle.min.js_/
-    ...
+     output: {
+        path: path.join(__dirname, './dist'),
+        filename: 'bundle.js'
+    }
     };
     ```
     c)使用 webpack 编译文件（webpack 需要安装全局 --g 如果是直接执行 webpack --config webpack.dev.config.js webpack-cli 也需要全局安装）
@@ -1101,11 +1104,11 @@
     webpack.dev.config.js
 
     ```
-        output: {
-            path: path.join(__dirname, './dist'),
-            filename: '[name].[hash].js',
-            chunkFilename: '[name].[chunkhash].js'
-        }
+    output: {
+        path: path.join(__dirname, './dist'),
+        filename: '[name].[hash].js',
+        chunkFilename: '[name].[chunkhash].js'
+    }
     ```
 
     每次打包都用增加hash~
@@ -1147,3 +1150,38 @@
 
     npm start运行项目，看看是不是能正常访问啦。~
     说明一下：npm start打包后的文件存在内存中，你看不到的。~ 你可以把遗留dist/index.html删除掉了。
+
+    19. 提取公共代码
+    想象一下，我们的主文件，原来的bundle.js里面是不是包含了react,redux,react-router等等。这些代码？？这些代码基本上不会改变的。但是，他们合并在bundle.js里面，每次项目发布，重新请求bundle.js的时候，相当于重新请求了react等这些公共库。浪费了~
+    我们把react这些不会改变的公共库提取出来，用户缓存下来。从此以后，用户再也不用下载这些库了，无论是否发布项目。
+    webpack文档给了教程[https://webpack.docschina.org/guides/caching#-extracting-boilerplate-]
+    webpack.dev.config.js
+    ```
+    var webpack = require('webpack');
+
+    entry: {
+        app: [
+            'react-hot-loader/patch',
+            path.join(__dirname, 'src/index.js')
+        ],
+        vendor: ['react', 'react-router-dom', 'redux', 'react-dom', 'react-redux']
+    }
+
+        /*plugins*/
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor'
+        })
+    ```
+
+    把react等库生成打包到vendor.hash.js里面去。
+    但是你现在可能发现编译生成的文件app.[hash].js和vendor.[hash].js生成的hash一样的，这里是个问题，因为呀，你每次修改代码,都会导致vendor.[hash].js名字改变，那我们提取出来的意义也就没了。其实文档上写的很清楚，
+    ```
+    output: {
+        path: path.join(__dirname, './dist'),
+        filename: '[name].[hash].js', //这里应该用chunkhash替换hash
+        chunkFilename: '[name].[chunkhash].js'
+    }
+    ```
+
+    但是无奈，如果用chunkhash，会报错。和webpack-dev-server --hot不兼容，具体看这里。
+    现在我们在配置开发版配置文件，就向webpack-dev-server妥协，因为我们要用他。问题先放这里，等会我们配置正式版webpack.config.js的时候要解决这个问题。
