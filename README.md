@@ -674,7 +674,7 @@
     到这里我们就可以执行 npm start，打开 localhost:8080/counter 看效果了。
 
 
-    异步action
+    11. 异步action
     调用一个异步get请求去后台请求数据：
     -请求开始的时候，界面转圈提示正在加载。isLoading置为true。-
     -请求成功，显示数据。isLoading置为false,data填充数据。-
@@ -884,7 +884,7 @@
     ```
 
 
-    combinReducers优化
+    12. combinReducers优化
     redux提供了一个combineReducers函数来合并reducer，不用我们自己合并哦。写起来简单，但是意思和我们
     自己写的combinReducers也是一样的。
     src/redux/reducers.js
@@ -899,14 +899,14 @@
     });
     ```
 
-    devtool优化
+    13. devtool优化
     现在我们发现一个问题，代码哪里写错了，浏览器报错只报在build.js第几行。
     这让我们分析错误无从下手。增加webpack配置devtool！
     webpack.dev.config.js增加
     devtool: 'inline-source-map'
     同时，我们在srouce里面能看到我们写的代码，也能打断点调试哦~
 
-    编译css
+    14. 编译css
     先说这里为什么不用scss，因为Windows使用node-sass，需要先安装 Microsoft Windows SDK for Windows 7 and .NET Framework 4。
     我怕有些人copy这份代码后，没注意，运行不起来。所以这里不用scss了，如果需要，自行编译哦。
     npm install css-loader style-loader --save-dev
@@ -947,7 +947,7 @@
 
     npm start查看。
 
-    编译图片
+    15. 编译图片
     npm install --save-dev url-loader file-loader
     webpack.dev.config.js rules增加
 
@@ -987,7 +987,7 @@
     }
     ```
 
-    按需加载
+    16. 按需加载
     为什么要实现按需加载？
     我们现在看到，打包完后，所有页面只生成了一个 build.js,当我们首屏加载的时候，就会很慢。因为他也下载了别的页面的 js 了哦。
     如果每个页面都打包了自己单独的 JS，在进入自己页面的时候才加载对应的 js，那首屏加载就会快很多哦。
