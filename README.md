@@ -1185,3 +1185,76 @@
 
     但是无奈，如果用chunkhash，会报错。和webpack-dev-server --hot不兼容，具体看这里。
     现在我们在配置开发版配置文件，就向webpack-dev-server妥协，因为我们要用他。问题先放这里，等会我们配置正式版webpack.config.js的时候要解决这个问题。
+
+    20. Production 生产坏境构建
+    开发环境(development)和生产环境(production)的构建目标差异很大。在开发环境中，我们需要具有强大的、具有实时重新加载(live reloading)或热模块替换(hot module replacement)能力的 source map 和 localhost server。而在生产环境中，我们的目标则转向于关注更小的 bundle，更轻量的 source map，以及更优化的资源，以改善加载时间。由于要遵循逻辑分离，我们通常建议为每个环境编写彼此独立的 webpack 配置。
+    文档[https://webpack.docschina.org/guides/production]
+    type nul.> webpack.config.js
+    在webpack.dev.config.js的基础上先做以下几个修改~
+
+    先删除webpack-dev-server相关的东西~
+    devtool的值改成cheap-module-source-map
+    刚才说的hash改成chunkhash
+    webpack.config.js
+
+    ```
+    const path = require('path');
+    var HtmlWebpackPlugin = require('html-webpack-plugin');
+    var webpack = require('webpack');
+    module.exports = {
+        devtool: 'cheap-module-source-map',
+        entry: {
+            app: [
+                path.join(__dirname, 'src/index.js')
+            ],
+            vendor: ['react', 'react-router-dom', 'redux', 'react-dom', 'react-redux']
+        },
+        output: {
+            path: path.join(__dirname, './dist'),
+            filename: '[name].[chunkhash].js',
+            chunkFilename: '[name].[chunkhash].js'
+        },
+        module: {
+            rules: [{
+                test: /\.js$/,
+                use: ['babel-loader'],
+                include: path.join(__dirname, 'src')
+            }, {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader']
+            }, {
+                test: /\.(png|jpg|gif)$/,
+                use: [{
+                    loader: 'url-loader',
+                    options: {
+                        limit: 8192
+                    }
+                }]
+            }]
+        },
+        plugins: [
+            new HtmlWebpackPlugin({
+                filename: 'index.html',
+                template: path.join(__dirname, 'src/index.html')
+            }),
+            new webpack.optimize.CommonsChunkPlugin({
+                name: 'vendor'
+            })
+        ],
+
+        resolve: {
+            alias: {
+                pages: path.join(__dirname, 'src/pages'),
+                component: path.join(__dirname, 'src/component'),
+                router: path.join(__dirname, 'src/router'),
+                actions: path.join(__dirname, 'src/redux/actions'),
+                reducers: path.join(__dirname, 'src/redux/reducers')
+            }
+        }
+    };
+    ```
+
+    在package.json增加打包脚本
+    "build":"webpack --config webpack.config.js"
+    然后执行npm run build~看看dist文件夹是不是生成了我们发布要用的所有文件哦？
+    接下来我们还是要优化正式版配置文件~
