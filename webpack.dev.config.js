@@ -10,7 +10,8 @@ module.exports = {
   /** 输出到dist文件夹，输出文件名滋味bundle.min.js */
   output: {
     path: path.join(__dirname, './dist'),
-    filename: 'bundle.min.js'
+    filename: 'bundle.min.js',
+    chunkFilename: '[name].js'
   },
   devServer: {
     port: 8080,
@@ -39,6 +40,17 @@ module.exports = {
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 8192
+            }
+          }
+        ]
       }
     ]
   }

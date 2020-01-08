@@ -946,3 +946,147 @@
     ```
 
     npm start查看。
+
+    编译图片
+    npm install --save-dev url-loader file-loader
+    webpack.dev.config.js rules增加
+
+    ```
+    {
+        test: /\.(png|jpg|gif)$/,
+        use: [{
+            loader: 'url-loader',
+            options: {
+                limit: 8192
+            }
+        }]
+    }
+    ```
+
+    options limit 8192意思是，小于等于8K的图片会被转成base64编码，直接插入HTML中，减少HTTP请求。
+    我们来用Page1 测试下
+    cd src/pages/Page1
+    mkdir images
+    给images文件夹放一个图片。
+    修改代码，引用图片
+    src/pages/Page1/Page1.js
+
+    ```
+    import React, {Component} from 'react';
+    import './Page1.css';
+    import image from './images/brickpsert.jpg';
+    export default class Page1 extends Component {
+        render() {
+            return (
+                <div className="page-box">
+                    this is page1~
+                    <img src={image}/>
+                </div>
+            )
+        }
+    }
+    ```
+
+    按需加载
+    为什么要实现按需加载？
+    我们现在看到，打包完后，所有页面只生成了一个 build.js,当我们首屏加载的时候，就会很慢。因为他也下载了别的页面的 js 了哦。
+    如果每个页面都打包了自己单独的 JS，在进入自己页面的时候才加载对应的 js，那首屏加载就会快很多哦。
+    在 react-router 2.0 时代， 按需加载需要用到的最关键的一个函数，就是 require.ensure()，它是按需加载能够实现的核心。
+    在 4.0 版本，官方放弃了这种处理按需加载的方式，选择了一个更加简洁的处理方式。
+    传送门 [https://reacttraining.com/react-router/web/guides/code-splitting]
+    根据官方示例
+    npm install bundle-loader --save-dev
+    新建 bundle.js
+    cd src/router
+    type nul.> Bundle.js
+    src/router/Bundle.js
+    ```
+    import React, {Component} from 'react'
+    class Bundle extends Component {
+        state = {
+            // short for "module" but that's a keyword in js, so "mod"
+            mod: null
+        };
+        componentWillMount() {
+            this.load(this.props)
+        }
+        componentWillReceiveProps(nextProps) {
+            if (nextProps.load !== this.props.load) {
+                this.load(nextProps)
+            }
+        }
+        load(props) {
+            this.setState({
+                mod: null
+            });
+            props.load((mod) => {
+                this.setState({
+                    // handle both es imports and cjs
+                    mod: mod.default ? mod.default : mod
+                })
+            })
+        }
+        render() {
+            return this.props.children(this.state.mod)
+        }
+    }
+    export default Bundle;
+    ```
+
+    改造路由器
+    src/router/router.js
+
+    ```
+    import React from 'react';
+    import {BrowserRouter as Router, Route, Switch, Link} from 'react-router-dom';
+    import Bundle from './Bundle';
+
+    import Home from 'bundle-loader?lazy&name=home!pages/Home/Home';
+    import Page1 from 'bundle-loader?lazy&name=page1!pages/Page1/Page1';
+    import Counter from 'bundle-loader?lazy&name=counter!pages/Counter/Counter';
+    import UserInfo from 'bundle-loader?lazy&name=userInfo!pages/UserInfo/UserInfo';
+
+    const Loading = function () {
+        return <div>Loading...</div>
+    };
+    const createComponent = (component) => (props) => (
+        <Bundle load={component}>
+            {
+                (Component) => Component ? <Component {...props} /> : <Loading/>
+            }
+        </Bundle>
+    );
+    const getRouter = () => (
+        <Router>
+            <div>
+                <ul>
+                    <li><Link to="/">首页</Link></li>
+                    <li><Link to="/page1">Page1</Link></li>
+                    <li><Link to="/counter">Counter</Link></li>
+                    <li><Link to="/userinfo">UserInfo</Link></li>
+                </ul>
+                <Switch>
+                    <Route exact path="/" component={createComponent(Home)}/>
+                    <Route path="/page1" component={createComponent(Page1)}/>
+                    <Route path="/counter" component={createComponent(Counter)}/>
+                    <Route path="/userinfo" component={createComponent(UserInfo)}/>
+                </Switch>
+            </div>
+        </Router>
+    );
+    export default getRouter;
+    ```
+
+    现在你可以npm start，打开浏览器，看是不是进入新的页面，都会加载自己的JS的~
+    但是你可能发现，名字都是0.bundle.js这样子的，这分不清楚是哪个页面的js呀！
+    我们修改下webpack.dev.config.js,加个chunkFilename。chunkFilename是除了entry定义的入口js之外的js~
+        output: {
+            path: path.join(__dirname, './dist'),
+            filename: 'bundle.js',
+            chunkFilename: '[name].js'
+        }
+    现在你运行发现名字变成home.js,这样的了。棒棒哒！
+    那么问题来了home是在哪里设置的？webpack怎么知道他叫home？
+    其实在这里我们定义了，router.js里面
+    import Home from 'bundle-loader?lazy&name=home!pages/Home/Home';
+    看到没。这里有个name=home。
