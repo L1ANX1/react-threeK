@@ -1,5 +1,5 @@
 const path = require('path');
-const srcRoot = './src';
+var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   devtool: 'inline-source-map',
@@ -10,8 +10,8 @@ module.exports = {
   /** 输出到dist文件夹，输出文件名滋味bundle.min.js */
   output: {
     path: path.join(__dirname, './dist'),
-    filename: 'bundle.min.js',
-    chunkFilename: '[name].js'
+    filename: '[name].[hash].js',
+    chunkFilename: '[name].[chunkhash].js'
   },
   devServer: {
     port: 8080,
@@ -53,5 +53,6 @@ module.exports = {
         ]
       }
     ]
-  }
+  },
+  plugins: [new HtmlWebpackPlugin({ filename: 'index.html', template: path.join(__dirname, 'src/index.html') })]
 };

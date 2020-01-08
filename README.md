@@ -1090,3 +1090,60 @@
     其实在这里我们定义了，router.js里面
     import Home from 'bundle-loader?lazy&name=home!pages/Home/Home';
     看到没。这里有个name=home。
+
+    17. Caching
+    想象一下这个场景~。用户第一次访问首页，下载了home.js，第二次访问又下载了home.js~
+    这肯定不行呀，所以我们一般都会做一个缓存，用户下载一次home.js后，第二次就不下载了。
+    有一天，我们更新了home.js，但是用户不知道呀，用户还是使用本地旧的home.js。出问题了~
+    怎么解决？每次代码更新后，打包生成的名字不一样。比如第一次叫home.a.js，第二次叫home.b.js。
+    文档[https://webpack.docschina.org/guides/caching]
+    我们照着文档来
+    webpack.dev.config.js
+
+    ```
+        output: {
+            path: path.join(__dirname, './dist'),
+            filename: '[name].[hash].js',
+            chunkFilename: '[name].[chunkhash].js'
+        }
+    ```
+
+    每次打包都用增加hash~
+    现在我们试试，是不是修改了文件，打包后相应的文件名字就变啦？
+    但是你可能发现了，网页打开报错了~因为你dist/index.html里面引用js名字还是bundle.js老名字啊,改成新的名字就可以啦。
+    啊~那岂不是我每次编译打包，都得去改一下js名字？欲知后事如何，且看下节分享。
+
+    18. HtmlWebpackPlugin
+    这个插件，每次会自动把js插入到你的模板index.html里面去。
+    npm install html-webpack-plugin --save-dev
+    新建模板index.html
+    cd src
+    type nul.> index.html
+    src/index.html
+
+    ```
+    <!doctype html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Document</title>
+    </head>
+    <body>
+    <div id="app"></div>
+    </body>
+    </html>
+    ```
+
+    修改webpack.dev.config.js，增加plugin
+
+    ```
+    var HtmlWebpackPlugin = require('html-webpack-plugin');
+
+        plugins: [new HtmlWebpackPlugin({
+            filename: 'index.html',
+            template: path.join(__dirname, 'src/index.html')
+        })],
+    ```
+
+    npm start运行项目，看看是不是能正常访问啦。~
+    说明一下：npm start打包后的文件存在内存中，你看不到的。~ 你可以把遗留dist/index.html删除掉了。
