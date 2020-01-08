@@ -2,6 +2,7 @@ const path = require('path');
 const srcRoot = './src';
 
 module.exports = {
+  devtool: 'inline-source-map',
   /** 入口 */
   entry: ['react-hot-loader/patch', path.join(__dirname, 'src/index.js')],
   // entry: [    './app.js'  ],
@@ -33,8 +34,12 @@ module.exports = {
         test: /\.(js|jsx)$/,
         use: ['babel-loader?cacheDirectory=true'],
         include: path.join(__dirname, 'src')
-      }
+      },
       // { test: /\.(js|jsx)$/, use: [{ loader: 'babel-loader' }], include: path.resolve(srcRoot) }
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      }
     ]
   }
 };

@@ -882,3 +882,67 @@
     );
     export default getRouter;
     ```
+
+
+    combinReducers优化
+    redux提供了一个combineReducers函数来合并reducer，不用我们自己合并哦。写起来简单，但是意思和我们
+    自己写的combinReducers也是一样的。
+    src/redux/reducers.js
+
+    ```
+    import {combineReducers} from "redux";
+    import counter from 'reducers/counter';
+    import userInfo from 'reducers/userInfo';
+    export default combineReducers({
+        counter,
+        userInfo
+    });
+    ```
+
+    devtool优化
+    现在我们发现一个问题，代码哪里写错了，浏览器报错只报在build.js第几行。
+    这让我们分析错误无从下手。增加webpack配置devtool！
+    webpack.dev.config.js增加
+    devtool: 'inline-source-map'
+    同时，我们在srouce里面能看到我们写的代码，也能打断点调试哦~
+
+    编译css
+    先说这里为什么不用scss，因为Windows使用node-sass，需要先安装 Microsoft Windows SDK for Windows 7 and .NET Framework 4。
+    我怕有些人copy这份代码后，没注意，运行不起来。所以这里不用scss了，如果需要，自行编译哦。
+    npm install css-loader style-loader --save-dev
+    css-loader使你能够使用类似@import 和 url(...)的方法实现 require()的功能；
+    style-loader将所有的计算后的样式加入页面中； 二者组合在一起使你能够把样式表嵌入webpack打包后的JS文件中。
+    webpack.dev.config.js rules增加
+    ```
+    {
+    test: /\.css$/,
+    use: ['style-loader', 'css-loader']
+    }
+    ```
+
+    我们用Page1页面来测试下
+    cd src/pages/Page1
+    type nul.> Page1.css
+    src/pages/Page1/Page1.css
+    ```
+    .page-box {
+        border: 1px solid red;
+    }
+    src/pages/Page1/Page1.js
+    ```
+
+    ```
+    import React, {Component} from 'react';
+    import './Page1.css';
+    export default class Page1 extends Component {
+        render() {
+            return (
+                <div className="page-box">
+                    this is page1~
+                </div>
+            )
+        }
+    }
+    ```
+
+    npm start查看。
