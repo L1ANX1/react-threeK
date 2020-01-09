@@ -56,6 +56,11 @@ module.exports = {
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor'
     }),
-    new UglifyJSPlugin()
+    new UglifyJSPlugin(),
+    new webpack.DefinePlugin({
+      'process-env': {
+        NODE_ENV: JSON.stringify('production')
+      }
+    })
   ]
 };
