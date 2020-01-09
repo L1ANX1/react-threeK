@@ -2,6 +2,7 @@ const path = require('path');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
   devtool: 'cheap-module-source-map',
@@ -13,7 +14,7 @@ module.exports = {
   /** 输出到dist文件夹，输出文件名滋味bundle.min.js */
   output: {
     publicPath: '/',
-    path: path.join(__dirname, './dist/build'),
+    path: path.join(__dirname, './dist'),
     filename: '[name].[chunkhash].js',
     chunkFilename: '[name].[chunkhash].js'
   },
@@ -64,6 +65,7 @@ module.exports = {
         NODE_ENV: JSON.stringify('production')
       }
     }),
-    new webpack.HashedModuleIdsPlugin()
+    new webpack.HashedModuleIdsPlugin(),
+    new CleanWebpackPlugin(['dist'])
   ]
 };

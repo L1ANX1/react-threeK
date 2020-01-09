@@ -1323,3 +1323,17 @@
             publicPath : '/'
         }
     ```
+
+    25. 打包优化
+    你现在打开dist，是不是发现好多好多文件，每次打包后的文件在这里混合了？我们希望每次打包前自动清理下dist文件。
+    npm install clean-webpack-plugin@1 --save-dev
+    webpack.config.js
+    ```
+    const CleanWebpackPlugin = require('clean-webpack-plugin');
+
+    plugins: [
+        new CleanWebpackPlugin(['dist'])
+    ]
+    ```
+
+    现在npm run build试试，是不是之前的都清空了。当然我们之前的api文件夹也被清空了，不过没关系哦~本来就是测试用的。
