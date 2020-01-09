@@ -12,6 +12,7 @@ module.exports = {
   },
   /** 输出到dist文件夹，输出文件名滋味bundle.min.js */
   output: {
+    publicPath: '/',
     path: path.join(__dirname, './dist/build'),
     filename: '[name].[chunkhash].js',
     chunkFilename: '[name].[chunkhash].js'

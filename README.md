@@ -1313,3 +1313,13 @@
     ```
     解释[https://webpack.docschina.org/concepts/manifest]
     注意，引入顺序在这里很重要。CommonsChunkPlugin 的 'vendor' 实例，必须在 'runtime' 实例之前引入。
+
+    24. public path
+    想象一个场景，我们的静态文件放在了单独的静态服务器上去了，那我们打包的时候，如何让静态文件的链接定位到静态服务器呢？
+    看文档[https://webpack.docschina.org/guides/public-path]
+    webpack.config.js output 中增加一个publicPath，我们当前用/，相对于当前路径，如果你要改成别的url，就改这里就好了。
+    ```
+        output: {
+            publicPath : '/'
+        }
+    ```
