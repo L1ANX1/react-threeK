@@ -1291,3 +1291,25 @@
     ```
 
     npm run build后发现vendor.[hash].js又变小了。
+
+    23. 优化缓存
+    刚才我们把[name].[hash].js变成[name].[chunkhash].js后，npm run build后，
+    发现app.xxx.js和vendor.xxx.js不一样了哦。
+    但是现在又有一个问题了。
+    你随便修改代码一处，例如Home.js，随便改变个字，你发现home.xxx.js名字变化的同时，
+    vendor.xxx.js名字也变了。这不行啊。这和没拆分不是一样一样了吗？我们本意是vendor.xxx.js
+    名字永久不变，一直缓存在用户本地的。
+    官方文档推荐了一个插件HashedModuleIdsPlugin
+    ```
+        plugins: [
+            new webpack.HashedModuleIdsPlugin()
+        ]
+    ```
+    还要加一个runtime代码抽取，
+    ```
+    new webpack.optimize.CommonsChunkPlugin({
+        name: 'runtime'
+    })
+    ```
+    解释[https://webpack.docschina.org/concepts/manifest]
+    注意，引入顺序在这里很重要。CommonsChunkPlugin 的 'vendor' 实例，必须在 'runtime' 实例之前引入。
