@@ -1337,3 +1337,34 @@
     ```
 
     现在npm run build试试，是不是之前的都清空了。当然我们之前的api文件夹也被清空了，不过没关系哦~本来就是测试用的。
+
+    26. 抽取css
+    目前我们的css是直接打包进js里面的，我们希望能单独生成css文件。
+    我们使用extract-text-webpack-plugin来实现。
+    npm install --save-dev extract-text-webpack-plugin
+    webpack.config.js
+    ```
+    const ExtractTextPlugin = require("extract-text-webpack-plugin");
+
+    module.exports = {
+    module: {
+        rules: [
+        {
+            test: /\.css$/,
+            use: ExtractTextPlugin.extract({
+            fallback: "style-loader",
+            use: "css-loader"
+            })
+        }
+        ]
+    },
+    plugins: [
+        new ExtractTextPlugin({
+            filename: '[name].[contenthash:5].css',
+            allChunks: true
+        })
+    ]
+    }
+    ```
+
+    npm run build后发现单独生成了css文件哦
