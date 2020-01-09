@@ -1,6 +1,7 @@
 const path = require('path');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
   devtool: 'cheap-module-source-map',
@@ -54,6 +55,7 @@ module.exports = {
     new HtmlWebpackPlugin({ filename: 'index.html', template: path.join(__dirname, 'src/index.html') }),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor'
-    })
+    }),
+    new UglifyJSPlugin()
   ]
 };

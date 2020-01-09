@@ -1258,3 +1258,18 @@
     "build":"webpack --config webpack.config.js"
     然后执行npm run build~看看dist文件夹是不是生成了我们发布要用的所有文件哦？
     接下来我们还是要优化正式版配置文件~
+
+    21. 文件压缩
+    webpack使用UglifyJSPlugin来压缩生成的文件。
+    npm i --save-dev uglifyjs-webpack-plugin@1
+    webpack.config.js
+    ```
+    const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+
+    module.exports = {
+    plugins: [
+        new UglifyJSPlugin()
+    ]
+    }
+    ```
+    npm run build发现打包文件大小减小了好多。
