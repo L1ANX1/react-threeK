@@ -1381,3 +1381,138 @@
     ```
 
     npm run build 后发现单独生成了 css 文件哦
+
+27. 使用 axios 和 middleware 优化 API 请求
+    先安装下 axios[https://github.com/axios/axios]
+    npm install --save axios
+    我们之前项目的一次 API 请求是这样写的哦~
+    action 创建函数是这样的。比我们现在写的 fetch 简单多了。
+
+    ```
+    export function getUserInfo() {
+        return {
+            types: [GET_USER_INFO_REQUEST, GET_USER_INFO_SUCCESS, GET_USER_INFO_FAIL],
+            promise: client => client.get(`http://localhost:8080/api/user.json`)
+            afterSuccess:(dispatch,getState,response)=>{
+                /*请求成功后执行的函数*/
+            },
+            otherData:otherData
+        }
+    }
+    ```
+
+    然后在 dispatch(getUserInfo())后，通过 redux 中间件来处理请求逻辑。
+    中间件的教程[http://cn.redux.js.org/docs/advanced/Middleware.html]
+    我们想想中间件的逻辑
+
+    - 请求前 dispatch REQUEST 请求。-
+    - 成功后 dispatch SUCCESS 请求，如果定义了 afterSuccess()函数，调用它。-
+    - 失败后 dispatch FAIL 请求。-
+      cd src/redux
+      mkdir middleware
+      cd middleware
+      touch promiseMiddleware.js
+
+    src/redux/middleware/promiseMiddleware.js
+
+    ```
+    import axios from 'axios';
+    export default  store => next => action => {
+        const {dispatch, getState} = store;
+        /*如果dispatch来的是一个function，此处不做处理，直接进入下一级*/
+        if (typeof action === 'function') {
+            action(dispatch, getState);
+            return;
+        }
+        /*解析action*/
+        const {
+            promise,
+            types,
+            afterSuccess,
+            ...rest
+        } = action;
+
+        /*没有promise，证明不是想要发送ajax请求的，就直接进入下一步啦！*/
+        if (!action.promise) {
+            return next(action);
+        }
+
+        /*解析types*/
+        const [REQUEST,
+            SUCCESS,
+            FAILURE] = types;
+
+        /*开始请求的时候，发一个action*/
+        next({
+            ...rest,
+            type: REQUEST
+        });
+        /*定义请求成功时的方法*/
+        const onFulfilled = result => {
+            next({
+                ...rest,
+                result,
+                type: SUCCESS
+            });
+            if (afterSuccess) {
+                afterSuccess(dispatch, getState, result);
+            }
+        };
+        /*定义请求失败时的方法*/
+        const onRejected = error => {
+            next({
+                ...rest,
+                error,
+                type: FAILURE
+            });
+        };
+
+        return promise(axios).then(onFulfilled, onRejected).catch(error => {
+            console.error('MIDDLEWARE ERROR:', error);
+            onRejected(error)
+        })
+    }
+    ```
+
+    修改 src/redux/store.js 来应用这个中间件
+
+    ```
+    import {createStore, applyMiddleware} from 'redux';
+    import combineReducers from './reducers.js';
+
+    import promiseMiddleware from './middleware/promiseMiddleware'
+
+    let store = createStore(combineReducers, applyMiddleware(promiseMiddleware));
+
+    export default store;
+    ```
+
+    修改 src/redux/actions/userInfo.js
+
+    ```
+    export const GET_USER_INFO_REQUEST = "userInfo/GET_USER_INFO_REQUEST";
+    export const GET_USER_INFO_SUCCESS = "userInfo/GET_USER_INFO_SUCCESS";
+    export const GET_USER_INFO_FAIL = "userInfo/GET_USER_INFO_FAIL";
+
+    export function getUserInfo() {
+        return {
+            types: [GET_USER_INFO_REQUEST, GET_USER_INFO_SUCCESS, GET_USER_INFO_FAIL],
+            promise: client => client.get(`http://localhost:8080/api/user.json`)
+        }
+    }
+    ```
+
+    修改 src/redux/reducers/userInfo.js
+
+    ```
+            case GET_USER_INFO_SUCCESS:
+                return {
+                    ...state,
+                    isLoading: false,
+                    userInfo: action.result.data,
+                    errorMsg: ''
+                };
+    ```
+
+    action.userInfo 修改成了 action.result.data。你看中间件，请求成功，会给 action 增加一个 result 字段来存储响应结果哦~不用手动传了。
+    npm start 看看我们的网络请求是不是正常哦。
