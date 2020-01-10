@@ -249,8 +249,8 @@
     webpack-dev-server，我们就看看它的其他的配置项。
     看了之后，发现有几个我们可以用的。
 
-    - color（CLI only） console 中打印彩色日志-
-    - historyApiFallback 任意的 404 响应都被替代为 index.html。有什么用呢？你现在运行 npm start，然后打开浏览器，访问http://localhost:8080,然后点击Page1到链接http://localhost:8080/page1，然后刷新页面试试。是不是发现刷新后 404 了。为什么？dist 文件夹里面并没有 page1.html,当然会 404 了，所以我们需要配置 historyApiFallback，让所有的 404 定位到 index.html。-
+    - color（CLI only） console 中打印彩色日志
+    - historyApiFallback 任意的 404 响应都被替代为 index.html。有什么用呢？你现在运行 npm start，然后打开浏览器，访问http://localhost:8080,然后点击Page1到链接http://localhost:8080/page1，然后刷新页面试试。是不是发现刷新后 404 了。为什么？dist 文件夹里面并没有 page1.html,当然会 404 了，所以我们需要配置 historyApiFallback，让所有的 404 定位到 index.html。
     - host 指定一个 host,默认是 localhost。如果你希望服务器外部可以访问，指定如下：host: "0.0.0.0"。比如你用手机通过 IP 访问。-
     - hot 启用 Webpack 的模块热替换特性。-
     - port 配置要监听的端口。默认就是我们现在使用的 8080 端口。-
@@ -508,9 +508,11 @@
 
     该测试，说明 redux 和 react 没关系
     redux 的数据流，看看这里。
-    http://cn.redux.js.org/docs/basics/DataFlow.html -调用 store.dispatch(action)提交 action。-
-    -redux store 调用传入的 reducer 函数。把当前的 state 和 action 传进去。- -根 reducer 应该把多个子 reducer 输出合并成一个单一的 state 树。-
-    -Redux store 保存了根 reducer 返回的完整 state 树。-
+    http://cn.redux.js.org/docs/basics/DataFlow.html
+
+    - 调用 store.dispatch(action)提交 action。
+    - redux store 调用传入的 reducer 函数。把当前的 state 和 action 传进去。- 根 reducer 应该把多个子 reducer 输出合并成一个单一的 state 树。
+    - Redux store 保存了根 reducer 返回的完整 state 树。
 
     webpack.dev.config.js 路径别名增加一下，后面好写了。
     webpack.dev.config.js
@@ -677,7 +679,12 @@
     到这里我们就可以执行 npm start，打开 localhost:8080/counter 看效果了。
 
 11. 异步 action
-    调用一个异步 get 请求去后台请求数据： -请求开始的时候，界面转圈提示正在加载。isLoading 置为 true。- -请求成功，显示数据。isLoading 置为 false,data 填充数据。- -请求失败，显示失败。isLoading 置为 false，显示错误信息。-
+    调用一个异步 get 请求去后台请求数据：
+
+    - 请求开始的时候，界面转圈提示正在加载。isLoading 置为 true。
+    - 请求成功，显示数据。isLoading 置为 false,data 填充数据。
+    - 请求失败，显示失败。isLoading 置为 false，显示错误信息。
+
     下面，我们以向后台请求用户基本信息为例。
     我们先创建一个 user.json，等会请求用，相当于后台的 API 接口。
     cd dist
@@ -1405,13 +1412,14 @@
     中间件的教程[http://cn.redux.js.org/docs/advanced/Middleware.html]
     我们想想中间件的逻辑
 
-    - 请求前 dispatch REQUEST 请求。-
-    - 成功后 dispatch SUCCESS 请求，如果定义了 afterSuccess()函数，调用它。-
-    - 失败后 dispatch FAIL 请求。-
-      cd src/redux
-      mkdir middleware
-      cd middleware
-      touch promiseMiddleware.js
+    - 请求前 dispatch REQUEST 请求。
+    - 成功后 dispatch SUCCESS 请求，如果定义了 afterSuccess()函数，调用它。
+    - 失败后 dispatch FAIL 请求。
+
+    cd src/redux
+    mkdir middleware
+    cd middleware
+    touch promiseMiddleware.js
 
     src/redux/middleware/promiseMiddleware.js
 
@@ -1516,3 +1524,11 @@
 
     action.userInfo 修改成了 action.result.data。你看中间件，请求成功，会给 action 增加一个 result 字段来存储响应结果哦~不用手动传了。
     npm start 看看我们的网络请求是不是正常哦。
+
+28. 调整文本编辑器
+    使用自动编译代码时，可能会在保存文件时遇到一些问题。某些编辑器具有“安全写入”功能，可能会影响重新编译。
+    要在一些常见的编辑器中禁用此功能，请查看以下列表：
+    - Sublime Text 3 - 在用户首选项(user preferences)中添加 atomic_save: "false"。
+    - IntelliJ - 在首选项(preferences)中使用搜索，查找到 "safe write" 并且禁用它。
+    - Vim - 在设置(settings)中增加 :set backupcopy=yes。
+    - WebStorm - 在 Preferences > Appearance & Behavior > System Settings 中取消选中 Use "safe write"。
