@@ -60,7 +60,10 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({ filename: 'index.html', template: path.join(__dirname, 'src/index.html') }),
     new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
+      name: 'vendor'
+      // name: 'runtime'
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
       name: 'runtime'
     }),
     new UglifyJSPlugin(),
