@@ -19,7 +19,7 @@ export default function reducer(state = initState, action) {
       return {
         ...state,
         loading: false,
-        userInfo: action.result.userInfo,
+        userInfo: action.userInfo,
         errorMsg: ''
       };
     case GET_USER_INFO_FAIL:
