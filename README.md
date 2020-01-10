@@ -676,27 +676,23 @@
 
     到这里我们就可以执行 npm start，打开 localhost:8080/counter 看效果了。
 
-
-    11. 异步action
-    调用一个异步get请求去后台请求数据：
-    -请求开始的时候，界面转圈提示正在加载。isLoading置为true。-
-    -请求成功，显示数据。isLoading置为false,data填充数据。-
-    -请求失败，显示失败。isLoading置为false，显示错误信息。-
-    下面，我们以向后台请求用户基本信息为例。
-    我们先创建一个user.json，等会请求用，相当于后台的API接口。
-    cd dist
-    mkdir api
-    cd api
-    type nul.> user.json
-    dist/api/user.json
-    {
-    "name": "brickspert",
-    "intro": "please give me a star"
-    }
-    创建必须的action创建函数。
-    cd src/redux/actions
-    type nul.> userInfo.js
-    src/redux/actions/userInfo.js
+    11. 异步 action
+        调用一个异步 get 请求去后台请求数据： -请求开始的时候，界面转圈提示正在加载。isLoading 置为 true。- -请求成功，显示数据。isLoading 置为 false,data 填充数据。- -请求失败，显示失败。isLoading 置为 false，显示错误信息。-
+        下面，我们以向后台请求用户基本信息为例。
+        我们先创建一个 user.json，等会请求用，相当于后台的 API 接口。
+        cd dist
+        mkdir api
+        cd api
+        type nul.> user.json
+        dist/api/user.json
+        {
+        "name": "brickspert",
+        "intro": "please give me a star"
+        }
+        创建必须的 action 创建函数。
+        cd src/redux/actions
+        type nul.> userInfo.js
+        src/redux/actions/userInfo.js
 
     ```
     export const GET_USER_INFO_REQUEST = "userInfo/GET_USER_INFO_REQUEST";
@@ -720,12 +716,13 @@
     }
     ```
 
-    创建了请求中，请求成功，请求失败三个action创建函数。
-    创建reducer
-    再强调下，reducer是根据state和action生成新state的纯函数。
+    创建了请求中，请求成功，请求失败三个 action 创建函数。
+    创建 reducer
+    再强调下，reducer 是根据 state 和 action 生成新 state 的纯函数。
     cd src/redux/reducers
     type nul.> userInfo.js
     src/redux/reducers/userInfo.js
+
     ```
     import {GET_USER_INFO_REQUEST, GET_USER_INFO_SUCCESS, GET_USER_INFO_FAIL} from '@actions/userInfo';
     const initState = {
@@ -762,7 +759,7 @@
     }
     ```
 
-    组合reducer
+    组合 reducer
     src/redux/reducers.js
 
     ```
@@ -776,11 +773,12 @@
     }
     ```
 
-    现在有了action，有了reducer，我们就需要调用把action里面的三个action函数和网络请求结合起来。
+    现在有了 action，有了 reducer，我们就需要调用把 action 里面的三个 action 函数和网络请求结合起来。
     请求中 dispatch getUserInfoRequest
     请求成功 dispatch getUserInfoSuccess
     请求失败 dispatch getUserInfoFail
-    src/redux/actions/userInfo.js增加
+    src/redux/actions/userInfo.js 增加
+
     ```
     export function getUserInfo() {
         return function (dispatch) {
@@ -801,13 +799,13 @@
     }
     ```
 
-    让action创建函数除了返回action对象外，还可以返回函数，我们需要引用redux-thunk。
+    让 action 创建函数除了返回 action 对象外，还可以返回函数，我们需要引用 redux-thunk。
     npm install --save redux-thunk
-    这里涉及到redux中间件middleware。
-    简单的说，中间件就是action在到达reducer，先经过中间件处理。我们之前知道reducer能处理的action只有这样的{type:xxx}，所以我们使用中间件来处理
-    函数形式的action，把他们转为标准的action给reducer。这是redux-thunk的作用。
-    使用redux-thunk中间件
-    我们来引入redux-thunk中间件
+    这里涉及到 redux 中间件 middleware。
+    简单的说，中间件就是 action 在到达 reducer，先经过中间件处理。我们之前知道 reducer 能处理的 action 只有这样的{type:xxx}，所以我们使用中间件来处理
+    函数形式的 action，把他们转为标准的 action 给 reducer。这是 redux-thunk 的作用。
+    使用 redux-thunk 中间件
+    我们来引入 redux-thunk 中间件
     src/redux/store.js
 
     ```
@@ -818,7 +816,7 @@
     export default store;
     ```
 
-    到这里，redux这边OK了，我们来写个组件验证下。
+    到这里，redux 这边 OK 了，我们来写个组件验证下。
     cd src/pages
     mkdir UserInfo
     cd UserInfo
@@ -852,9 +850,11 @@
     }
     export default connect((state) => ({userInfo: state.userInfo}), {getUserInfo})(UserInfo);
     ```
-    connect参数写法不一样了，mapStateToProps函数用了es6简写，mapDispatchToProps用了react-redux提供的简单写法。
+
+    connect 参数写法不一样了，mapStateToProps 函数用了 es6 简写，mapDispatchToProps 用了 react-redux 提供的简单写法。
     增加路由
     src/router/router.js
+
     ```
     import React from 'react';
 
@@ -886,11 +886,10 @@
     export default getRouter;
     ```
 
-
-    12. combinReducers优化
-    redux提供了一个combineReducers函数来合并reducer，不用我们自己合并哦。写起来简单，但是意思和我们
-    自己写的combinReducers也是一样的。
-    src/redux/reducers.js
+    12. combinReducers 优化
+        redux 提供了一个 combineReducers 函数来合并 reducer，不用我们自己合并哦。写起来简单，但是意思和我们
+        自己写的 combinReducers 也是一样的。
+        src/redux/reducers.js
 
     ```
     import {combineReducers} from "redux";
@@ -902,20 +901,21 @@
     });
     ```
 
-    13. devtool优化
-    现在我们发现一个问题，代码哪里写错了，浏览器报错只报在build.js第几行。
-    这让我们分析错误无从下手。增加webpack配置devtool！
-    webpack.dev.config.js增加
-    devtool: 'inline-source-map'
-    同时，我们在srouce里面能看到我们写的代码，也能打断点调试哦~
+    13. devtool 优化
+        现在我们发现一个问题，代码哪里写错了，浏览器报错只报在 build.js 第几行。
+        这让我们分析错误无从下手。增加 webpack 配置 devtool！
+        webpack.dev.config.js 增加
+        devtool: 'inline-source-map'
+        同时，我们在 srouce 里面能看到我们写的代码，也能打断点调试哦~
 
-    14. 编译css
-    先说这里为什么不用scss，因为Windows使用node-sass，需要先安装 Microsoft Windows SDK for Windows 7 and .NET Framework 4。
-    我怕有些人copy这份代码后，没注意，运行不起来。所以这里不用scss了，如果需要，自行编译哦。
-    npm install css-loader style-loader --save-dev
-    css-loader使你能够使用类似@import 和 url(...)的方法实现 require()的功能；
-    style-loader将所有的计算后的样式加入页面中； 二者组合在一起使你能够把样式表嵌入webpack打包后的JS文件中。
-    webpack.dev.config.js rules增加
+    14. 编译 css
+        先说这里为什么不用 scss，因为 Windows 使用 node-sass，需要先安装 Microsoft Windows SDK for Windows 7 and .NET Framework 4。
+        我怕有些人 copy 这份代码后，没注意，运行不起来。所以这里不用 scss 了，如果需要，自行编译哦。
+        npm install css-loader style-loader --save-dev
+        css-loader 使你能够使用类似@import 和 url(...)的方法实现 require()的功能；
+        style-loader 将所有的计算后的样式加入页面中； 二者组合在一起使你能够把样式表嵌入 webpack 打包后的 JS 文件中。
+        webpack.dev.config.js rules 增加
+
     ```
     {
     test: /\.css$/,
@@ -923,10 +923,11 @@
     }
     ```
 
-    我们用Page1页面来测试下
+    我们用 Page1 页面来测试下
     cd src/pages/Page1
     type nul.> Page1.css
     src/pages/Page1/Page1.css
+
     ```
     .page-box {
         border: 1px solid red;
@@ -948,11 +949,11 @@
     }
     ```
 
-    npm start查看。
+    npm start 查看。
 
     15. 编译图片
-    npm install --save-dev url-loader file-loader
-    webpack.dev.config.js rules增加
+        npm install --save-dev url-loader file-loader
+        webpack.dev.config.js rules 增加
 
     ```
     {
@@ -966,11 +967,11 @@
     }
     ```
 
-    options limit 8192意思是，小于等于8K的图片会被转成base64编码，直接插入HTML中，减少HTTP请求。
-    我们来用Page1 测试下
+    options limit 8192 意思是，小于等于 8K 的图片会被转成 base64 编码，直接插入 HTML 中，减少 HTTP 请求。
+    我们来用 Page1 测试下
     cd src/pages/Page1
     mkdir images
-    给images文件夹放一个图片。
+    给 images 文件夹放一个图片。
     修改代码，引用图片
     src/pages/Page1/Page1.js
 
@@ -991,18 +992,19 @@
     ```
 
     16. 按需加载
-    为什么要实现按需加载？
-    我们现在看到，打包完后，所有页面只生成了一个 build.js,当我们首屏加载的时候，就会很慢。因为他也下载了别的页面的 js 了哦。
-    如果每个页面都打包了自己单独的 JS，在进入自己页面的时候才加载对应的 js，那首屏加载就会快很多哦。
-    在 react-router 2.0 时代， 按需加载需要用到的最关键的一个函数，就是 require.ensure()，它是按需加载能够实现的核心。
-    在 4.0 版本，官方放弃了这种处理按需加载的方式，选择了一个更加简洁的处理方式。
-    传送门 [https://reacttraining.com/react-router/web/guides/code-splitting]
-    根据官方示例
-    npm install bundle-loader --save-dev
-    新建 bundle.js
-    cd src/router
-    type nul.> Bundle.js
-    src/router/Bundle.js
+        为什么要实现按需加载？
+        我们现在看到，打包完后，所有页面只生成了一个 build.js,当我们首屏加载的时候，就会很慢。因为他也下载了别的页面的 js 了哦。
+        如果每个页面都打包了自己单独的 JS，在进入自己页面的时候才加载对应的 js，那首屏加载就会快很多哦。
+        在 react-router 2.0 时代， 按需加载需要用到的最关键的一个函数，就是 require.ensure()，它是按需加载能够实现的核心。
+        在 4.0 版本，官方放弃了这种处理按需加载的方式，选择了一个更加简洁的处理方式。
+        传送门 [https://reacttraining.com/react-router/web/guides/code-splitting]
+        根据官方示例
+        npm install bundle-loader --save-dev
+        新建 bundle.js
+        cd src/router
+        type nul.> Bundle.js
+        src/router/Bundle.js
+
     ```
     import React, {Component} from 'react'
     class Bundle extends Component {
@@ -1080,28 +1082,28 @@
     export default getRouter;
     ```
 
-    现在你可以npm start，打开浏览器，看是不是进入新的页面，都会加载自己的JS的~
-    但是你可能发现，名字都是0.bundle.js这样子的，这分不清楚是哪个页面的js呀！
-    我们修改下webpack.dev.config.js,加个chunkFilename。chunkFilename是除了entry定义的入口js之外的js~
-        output: {
-            path: path.join(__dirname, './dist'),
-            filename: 'bundle.js',
-            chunkFilename: '[name].js'
-        }
-    现在你运行发现名字变成home.js,这样的了。棒棒哒！
-    那么问题来了home是在哪里设置的？webpack怎么知道他叫home？
-    其实在这里我们定义了，router.js里面
+    现在你可以 npm start，打开浏览器，看是不是进入新的页面，都会加载自己的 JS 的~
+    但是你可能发现，名字都是 0.bundle.js 这样子的，这分不清楚是哪个页面的 js 呀！
+    我们修改下 webpack.dev.config.js,加个 chunkFilename。chunkFilename 是除了 entry 定义的入口 js 之外的 js~
+    output: {
+    path: path.join(\_\_dirname, './dist'),
+    filename: 'bundle.js',
+    chunkFilename: '[name].js'
+    }
+    现在你运行发现名字变成 home.js,这样的了。棒棒哒！
+    那么问题来了 home 是在哪里设置的？webpack 怎么知道他叫 home？
+    其实在这里我们定义了，router.js 里面
     import Home from 'bundle-loader?lazy&name=home!pages/Home/Home';
-    看到没。这里有个name=home。
+    看到没。这里有个 name=home。
 
     17. Caching
-    想象一下这个场景~。用户第一次访问首页，下载了home.js，第二次访问又下载了home.js~
-    这肯定不行呀，所以我们一般都会做一个缓存，用户下载一次home.js后，第二次就不下载了。
-    有一天，我们更新了home.js，但是用户不知道呀，用户还是使用本地旧的home.js。出问题了~
-    怎么解决？每次代码更新后，打包生成的名字不一样。比如第一次叫home.a.js，第二次叫home.b.js。
-    文档[https://webpack.docschina.org/guides/caching]
-    我们照着文档来
-    webpack.dev.config.js
+        想象一下这个场景~。用户第一次访问首页，下载了 home.js，第二次访问又下载了 home.js~
+        这肯定不行呀，所以我们一般都会做一个缓存，用户下载一次 home.js 后，第二次就不下载了。
+        有一天，我们更新了 home.js，但是用户不知道呀，用户还是使用本地旧的 home.js。出问题了~
+        怎么解决？每次代码更新后，打包生成的名字不一样。比如第一次叫 home.a.js，第二次叫 home.b.js。
+        文档[https://webpack.docschina.org/guides/caching]
+        我们照着文档来
+        webpack.dev.config.js
 
     ```
     output: {
@@ -1111,18 +1113,18 @@
     }
     ```
 
-    每次打包都用增加hash~
+    每次打包都用增加 hash~
     现在我们试试，是不是修改了文件，打包后相应的文件名字就变啦？
-    但是你可能发现了，网页打开报错了~因为你dist/index.html里面引用js名字还是bundle.js老名字啊,改成新的名字就可以啦。
-    啊~那岂不是我每次编译打包，都得去改一下js名字？欲知后事如何，且看下节分享。
+    但是你可能发现了，网页打开报错了~因为你 dist/index.html 里面引用 js 名字还是 bundle.js 老名字啊,改成新的名字就可以啦。
+    啊~那岂不是我每次编译打包，都得去改一下 js 名字？欲知后事如何，且看下节分享。
 
     18. HtmlWebpackPlugin
-    这个插件，每次会自动把js插入到你的模板index.html里面去。
-    npm install html-webpack-plugin --save-dev
-    新建模板index.html
-    cd src
-    type nul.> index.html
-    src/index.html
+        这个插件，每次会自动把 js 插入到你的模板 index.html 里面去。
+        npm install html-webpack-plugin --save-dev
+        新建模板 index.html
+        cd src
+        type nul.> index.html
+        src/index.html
 
     ```
     <!doctype html>
@@ -1137,7 +1139,7 @@
     </html>
     ```
 
-    修改webpack.dev.config.js，增加plugin
+    修改 webpack.dev.config.js，增加 plugin
 
     ```
     var HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -1148,14 +1150,15 @@
         })],
     ```
 
-    npm start运行项目，看看是不是能正常访问啦。~
-    说明一下：npm start打包后的文件存在内存中，你看不到的。~ 你可以把遗留dist/index.html删除掉了。
+    npm start 运行项目，看看是不是能正常访问啦。~
+    说明一下：npm start 打包后的文件存在内存中，你看不到的。~ 你可以把遗留 dist/index.html 删除掉了。
 
     19. 提取公共代码
-    想象一下，我们的主文件，原来的bundle.js里面是不是包含了react,redux,react-router等等。这些代码？？这些代码基本上不会改变的。但是，他们合并在bundle.js里面，每次项目发布，重新请求bundle.js的时候，相当于重新请求了react等这些公共库。浪费了~
-    我们把react这些不会改变的公共库提取出来，用户缓存下来。从此以后，用户再也不用下载这些库了，无论是否发布项目。
-    webpack文档给了教程[https://webpack.docschina.org/guides/caching#-extracting-boilerplate-]
-    webpack.dev.config.js
+        想象一下，我们的主文件，原来的 bundle.js 里面是不是包含了 react,redux,react-router 等等。这些代码？？这些代码基本上不会改变的。但是，他们合并在 bundle.js 里面，每次项目发布，重新请求 bundle.js 的时候，相当于重新请求了 react 等这些公共库。浪费了~
+        我们把 react 这些不会改变的公共库提取出来，用户缓存下来。从此以后，用户再也不用下载这些库了，无论是否发布项目。
+        webpack 文档给了教程[https://webpack.docschina.org/guides/caching#-extracting-boilerplate-]
+        webpack.dev.config.js
+
     ```
     var webpack = require('webpack');
 
@@ -1173,8 +1176,9 @@
         })
     ```
 
-    把react等库生成打包到vendor.hash.js里面去。
-    但是你现在可能发现编译生成的文件app.[hash].js和vendor.[hash].js生成的hash一样的，这里是个问题，因为呀，你每次修改代码,都会导致vendor.[hash].js名字改变，那我们提取出来的意义也就没了。其实文档上写的很清楚，
+    把 react 等库生成打包到 vendor.hash.js 里面去。
+    但是你现在可能发现编译生成的文件 app.[hash].js 和 vendor.[hash].js 生成的 hash 一样的，这里是个问题，因为呀，你每次修改代码,都会导致 vendor.[hash].js 名字改变，那我们提取出来的意义也就没了。其实文档上写的很清楚，
+
     ```
     output: {
         path: path.join(__dirname, './dist'),
@@ -1183,18 +1187,18 @@
     }
     ```
 
-    但是无奈，如果用chunkhash，会报错。和webpack-dev-server --hot不兼容，具体看这里。
-    现在我们在配置开发版配置文件，就向webpack-dev-server妥协，因为我们要用他。问题先放这里，等会我们配置正式版webpack.config.js的时候要解决这个问题。
+    但是无奈，如果用 chunkhash，会报错。和 webpack-dev-server --hot 不兼容，具体看这里。
+    现在我们在配置开发版配置文件，就向 webpack-dev-server 妥协，因为我们要用他。问题先放这里，等会我们配置正式版 webpack.config.js 的时候要解决这个问题。
 
     20. Production 生产坏境构建
-    开发环境(development)和生产环境(production)的构建目标差异很大。在开发环境中，我们需要具有强大的、具有实时重新加载(live reloading)或热模块替换(hot module replacement)能力的 source map 和 localhost server。而在生产环境中，我们的目标则转向于关注更小的 bundle，更轻量的 source map，以及更优化的资源，以改善加载时间。由于要遵循逻辑分离，我们通常建议为每个环境编写彼此独立的 webpack 配置。
-    文档[https://webpack.docschina.org/guides/production]
-    type nul.> webpack.config.js
-    在webpack.dev.config.js的基础上先做以下几个修改~
+        开发环境(development)和生产环境(production)的构建目标差异很大。在开发环境中，我们需要具有强大的、具有实时重新加载(live reloading)或热模块替换(hot module replacement)能力的 source map 和 localhost server。而在生产环境中，我们的目标则转向于关注更小的 bundle，更轻量的 source map，以及更优化的资源，以改善加载时间。由于要遵循逻辑分离，我们通常建议为每个环境编写彼此独立的 webpack 配置。
+        文档[https://webpack.docschina.org/guides/production]
+        type nul.> webpack.config.js
+        在 webpack.dev.config.js 的基础上先做以下几个修改~
 
-    先删除webpack-dev-server相关的东西~
-    devtool的值改成cheap-module-source-map
-    刚才说的hash改成chunkhash
+    先删除 webpack-dev-server 相关的东西~
+    devtool 的值改成 cheap-module-source-map
+    刚才说的 hash 改成 chunkhash
     webpack.config.js
 
     ```
@@ -1254,15 +1258,16 @@
     };
     ```
 
-    在package.json增加打包脚本
+    在 package.json 增加打包脚本
     "build":"webpack --config webpack.config.js"
-    然后执行npm run build~看看dist文件夹是不是生成了我们发布要用的所有文件哦？
+    然后执行 npm run build~看看 dist 文件夹是不是生成了我们发布要用的所有文件哦？
     接下来我们还是要优化正式版配置文件~
 
     21. 文件压缩
-    webpack使用UglifyJSPlugin来压缩生成的文件。
-    npm i --save-dev uglifyjs-webpack-plugin@1
-    webpack.config.js
+        webpack 使用 UglifyJSPlugin 来压缩生成的文件。
+        npm i --save-dev uglifyjs-webpack-plugin@1
+        webpack.config.js
+
     ```
     const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 
@@ -1272,11 +1277,12 @@
     ]
     }
     ```
-    npm run build发现打包文件大小减小了好多。
+
+    npm run build 发现打包文件大小减小了好多。
 
     22. 指定环境
-    许多 library 将通过与 process.env.NODE_ENV 环境变量关联，以决定 library 中应该引用哪些内容。例如，当不处于生产环境中时，某些 library 为了使调试变得容易，可能会添加额外的日志记录(log)和测试(test)。其实，当使用 process.env.NODE_ENV === 'production' 时，一些 library 可能针对具体用户的环境进行代码优化，从而删除或添加一些重要代码。我们可以使用 webpack 内置的 DefinePlugin 为所有的依赖定义这个变量：
-    webpack.config.js
+        许多 library 将通过与 process.env.NODE_ENV 环境变量关联，以决定 library 中应该引用哪些内容。例如，当不处于生产环境中时，某些 library 为了使调试变得容易，可能会添加额外的日志记录(log)和测试(test)。其实，当使用 process.env.NODE_ENV === 'production' 时，一些 library 可能针对具体用户的环境进行代码优化，从而删除或添加一些重要代码。我们可以使用 webpack 内置的 DefinePlugin 为所有的依赖定义这个变量：
+        webpack.config.js
 
     ```
     module.exports = {
@@ -1290,34 +1296,39 @@
     }
     ```
 
-    npm run build后发现vendor.[hash].js又变小了。
+    npm run build 后发现 vendor.[hash].js 又变小了。
 
     23. 优化缓存
-    刚才我们把[name].[hash].js变成[name].[chunkhash].js后，npm run build后，
-    发现app.xxx.js和vendor.xxx.js不一样了哦。
-    但是现在又有一个问题了。
-    你随便修改代码一处，例如Home.js，随便改变个字，你发现home.xxx.js名字变化的同时，
-    vendor.xxx.js名字也变了。这不行啊。这和没拆分不是一样一样了吗？我们本意是vendor.xxx.js
-    名字永久不变，一直缓存在用户本地的。
-    官方文档推荐了一个插件HashedModuleIdsPlugin
+        刚才我们把[name].[hash].js 变成[name].[chunkhash].js 后，npm run build 后，
+        发现 app.xxx.js 和 vendor.xxx.js 不一样了哦。
+        但是现在又有一个问题了。
+        你随便修改代码一处，例如 Home.js，随便改变个字，你发现 home.xxx.js 名字变化的同时，
+        vendor.xxx.js 名字也变了。这不行啊。这和没拆分不是一样一样了吗？我们本意是 vendor.xxx.js
+        名字永久不变，一直缓存在用户本地的。
+        官方文档推荐了一个插件 HashedModuleIdsPlugin
+
     ```
         plugins: [
             new webpack.HashedModuleIdsPlugin()
         ]
     ```
-    还要加一个runtime代码抽取，
+
+    还要加一个 runtime 代码抽取，
+
     ```
     new webpack.optimize.CommonsChunkPlugin({
         name: 'runtime'
     })
     ```
+
     解释[https://webpack.docschina.org/concepts/manifest]
     注意，引入顺序在这里很重要。CommonsChunkPlugin 的 'vendor' 实例，必须在 'runtime' 实例之前引入。
 
     24. public path
-    想象一个场景，我们的静态文件放在了单独的静态服务器上去了，那我们打包的时候，如何让静态文件的链接定位到静态服务器呢？
-    看文档[https://webpack.docschina.org/guides/public-path]
-    webpack.config.js output 中增加一个publicPath，我们当前用/，相对于当前路径，如果你要改成别的url，就改这里就好了。
+        想象一个场景，我们的静态文件放在了单独的静态服务器上去了，那我们打包的时候，如何让静态文件的链接定位到静态服务器呢？
+        看文档[https://webpack.docschina.org/guides/public-path]
+        webpack.config.js output 中增加一个 publicPath，我们当前用/，相对于当前路径，如果你要改成别的 url，就改这里就好了。
+
     ```
         output: {
             publicPath : '/'
@@ -1325,9 +1336,10 @@
     ```
 
     25. 打包优化
-    你现在打开dist，是不是发现好多好多文件，每次打包后的文件在这里混合了？我们希望每次打包前自动清理下dist文件。
-    npm install clean-webpack-plugin@1 --save-dev
-    webpack.config.js
+        你现在打开 dist，是不是发现好多好多文件，每次打包后的文件在这里混合了？我们希望每次打包前自动清理下 dist 文件。
+        npm install clean-webpack-plugin@1 --save-dev
+        webpack.config.js
+
     ```
     const CleanWebpackPlugin = require('clean-webpack-plugin');
 
@@ -1336,13 +1348,14 @@
     ]
     ```
 
-    现在npm run build试试，是不是之前的都清空了。当然我们之前的api文件夹也被清空了，不过没关系哦~本来就是测试用的。
+    现在 npm run build 试试，是不是之前的都清空了。当然我们之前的 api 文件夹也被清空了，不过没关系哦~本来就是测试用的。
 
-    26. 抽取css
-    目前我们的css是直接打包进js里面的，我们希望能单独生成css文件。
-    我们使用extract-text-webpack-plugin来实现。
-    npm install --save-dev extract-text-webpack-plugin
-    webpack.config.js
+    26. 抽取 css
+        目前我们的 css 是直接打包进 js 里面的，我们希望能单独生成 css 文件。
+        我们使用 extract-text-webpack-plugin 来实现。
+        npm install --save-dev extract-text-webpack-plugin
+        webpack.config.js
+
     ```
     const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
@@ -1367,4 +1380,4 @@
     }
     ```
 
-    npm run build后发现单独生成了css文件哦
+    npm run build 后发现单独生成了 css 文件哦
