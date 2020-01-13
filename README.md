@@ -1533,3 +1533,162 @@
     - IntelliJ - 在首选项(preferences)中使用搜索，查找到 "safe write" 并且禁用它。
     - Vim - 在设置(settings)中增加 :set backupcopy=yes。
     - WebStorm - 在 Preferences > Appearance & Behavior > System Settings 中取消选中 Use "safe write"。
+
+29. 合并提取 webpack 公共配置
+    想象一个场景，现在我想给 webpack 增加一个 css modules 依赖，你会发现，即要修改 webpack.dev.config.js，又要修改 webpack.config.js~
+    这肯定不行啊。所以我们要把公共的配置文件提取出来。提取到 webpack.common.config.js 里面
+    webpack.dev.config.js 和 webpack.config.js 写自己的特殊的配置。
+    这里我们需要用到 webpack-merge 来合并公共配置和单独的配置。
+    这样说一下，应该看代码就能看懂了。下次公共配置直接就写在 webpack.common.config.js 里面啦。
+    这里偷偷说下，我修改了 CleanWebpackPlugin 的参数，不让他每次构建都删除 api 文件夹了。要不每次都得复制进去。麻烦~
+    npm install --save-dev webpack-merge
+    type nul.> webpack.common.config.js
+    webpack.common.config.js
+
+    ```
+    const path = require('path');
+    const HtmlWebpackPlugin = require('html-webpack-plugin');
+    const webpack = require('webpack');
+
+    commonConfig = {
+        entry: {
+            app: [
+                path.join(__dirname, 'src/index.js')
+            ],
+            vendor: ['react', 'react-router-dom', 'redux', 'react-dom', 'react-redux']
+        },
+        output: {
+            path: path.join(__dirname, './dist'),
+            filename: '[name].[chunkhash].js',
+            chunkFilename: '[name].[chunkhash].js',
+            publicPath: "/"
+        },
+        module: {
+            rules: [{
+                test: /\.js$/,
+                use: ['babel-loader?cacheDirectory=true'],
+                include: path.join(__dirname, 'src')
+            }, {
+                test: /\.(png|jpg|gif)$/,
+                use: [{
+                    loader: 'url-loader',
+                    options: {
+                        limit: 8192
+                    }
+                }]
+            }]
+        },
+        plugins: [
+            new HtmlWebpackPlugin({
+                filename: 'index.html',
+                template: path.join(__dirname, 'src/index.html')
+            }),
+            new webpack.HashedModuleIdsPlugin(),
+            new webpack.optimize.CommonsChunkPlugin({
+                name: 'vendor'
+            }),
+            new webpack.optimize.CommonsChunkPlugin({
+                name: 'runtime'
+            })
+        ],
+
+        resolve: {
+            alias: {
+                '@pages': path.join(__dirname, 'src/pages'),
+                '@components': path.join(__dirname, 'src/components'),
+                '@router': path.join(__dirname, 'src/router'),
+                '@actions': path.join(__dirname, 'src/redux/actions'),
+                '@reducers': path.join(__dirname, 'src/redux/reducers'),
+                '@redux': path.join(__dirname, 'src/redux')
+            }
+        }
+    };
+
+    module.exports = commonConfig;
+    ```
+
+    webpack.dev.config.js
+
+    ```
+    const merge = require('webpack-merge');
+    const path = require('path');
+
+    const commonConfig = require('./webpack.common.config.js');
+
+    const devConfig = {
+        devtool: 'inline-source-map',
+        entry: {
+            app: [
+                'react-hot-loader/patch',
+                path.join(__dirname, 'src/index.js')
+            ]
+        },
+        output: {
+            /*这里本来应该是[chunkhash]的，但是由于[chunkhash]和react-hot-loader不兼容。只能妥协*/
+            filename: '[name].[hash].js'
+        },
+        module: {
+            rules: [{
+                test: /\.css$/,
+                use: ["style-loader", "css-loader"]
+            }]
+        },
+        devServer: {
+            contentBase: path.join(__dirname, './dist'),
+            historyApiFallback: true,
+            host: '0.0.0.0',
+        }
+    };
+
+    module.exports = merge({
+        customizeArray(a, b, key) {
+            /*entry.app不合并，全替换*/
+            if (key === 'entry.app') {
+                return b;
+            }
+            return undefined;
+        }
+    })(commonConfig, devConfig);
+    ```
+
+    ```
+    webpack.config.js
+
+    const merge = require('webpack-merge');
+
+    const webpack = require('webpack');
+    const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+    const CleanWebpackPlugin = require('clean-webpack-plugin');
+    const ExtractTextPlugin = require("extract-text-webpack-plugin");
+
+    const commonConfig = require('./webpack.common.config.js');
+
+    const publicConfig = {
+        devtool: 'cheap-module-source-map',
+        module: {
+            rules: [{
+                test: /\.css$/,
+                use: ExtractTextPlugin.extract({
+                    fallback: "style-loader",
+                    use: "css-loader"
+                })
+            }]
+        },
+        plugins: [
+            new CleanWebpackPlugin(['dist/*.*']),
+            new UglifyJSPlugin(),
+            new webpack.DefinePlugin({
+                'process.env': {
+                    'NODE_ENV': JSON.stringify('production')
+                }
+            }),
+            new ExtractTextPlugin({
+                filename: '[name].[contenthash:5].css',
+                allChunks: true
+            })
+        ]
+
+    };
+
+    module.exports = merge(commonConfig, publicConfig);
+    ```
