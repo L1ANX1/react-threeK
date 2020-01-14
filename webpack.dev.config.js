@@ -13,7 +13,7 @@ const devConfig = {
     filename: '[name].[hash].js'
   },
   module: {
-    rules: [{ test: /\.css$/, use: ['style-loader', 'css-loader'] }]
+    rules: [{ test: /\.(css|scss)$/, use: ['style-loader', 'css-loader', 'postcss-loader'] }]
   },
   devServer: {
     contentBase: path.join(__dirname, './dist'),

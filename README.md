@@ -1849,3 +1849,60 @@
         path.join(__dirname, 'src/index.js')
     ]
     ```
+
+32. 集成 PostCSS
+    官方文档[https://github.com/postcss/postcss]
+
+    Q: 这是啥？为什么要用它？
+    他有很多很多的插件，我们举几个例子~
+    Autoprefixer 这个插件,可以自动给 css 属性加浏览器前缀。
+    /_编译前_/
+    .container{
+    display: flex;
+    }
+    /_编译后_/
+    .container{
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    }
+    postcss-cssnext 允许你使用未来的 CSS 特性（包括 autoprefixer）
+    当然，它有很多很多的插件可以用，你可以去官网详细了解。我们今天只用 postcss-cssnext。（它包含了 autoprefixer）
+    npm install --save-dev postcss-loader
+    npm install --save-dev postcss-cssnext
+    修改 webpack 配置文件,增加 postcss-loader
+    webpack.dev.config.js
+
+    ```
+    rules: [{
+        test: /\.(css|scss)$/,
+        use: ["style-loader", "css-loader", "postcss-loader"]
+    }]
+    ```
+
+    webpack.config.js
+
+    ```
+    rules: [{
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+            fallback: "style-loader",
+            use: ["css-loader", "postcss-loader"]
+        })
+    }]
+    ```
+
+    根目录增加 postcss 配置文件。
+    type nul.> postcss.config.js
+    postcss.config.js
+
+    ```
+    module.exports = {
+        plugins: {
+        'postcss-cssnext': {}
+        }
+    };
+    ```
+
+    现在你运行代码，然后写个 css，去浏览器审查元素，看看，属性是不是生成了浏览器前缀？
