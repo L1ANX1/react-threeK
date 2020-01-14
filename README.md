@@ -1812,3 +1812,40 @@
 
     <Route component={createComponent(NotFound)}/>
     ```
+
+31. 加入 babel-plugin-transform-runtime 和 babel-polyfill
+    先来说说 babel-plugin-transform-runtime
+    在转换 ES2015 语法为 ECMAScript 5 的语法时，babel 会需要一些辅助函数，例如 \_extend。babel 默认会将这些辅助函数内联到每一个 js 文件里，这样文件多的时候，项目就会很大。
+    所以 babel 提供了 transform-runtime 来将这些辅助函数“搬”到一个单独的模块 babel-runtime 中，这样做能减小项目文件的大小。
+    npm install --save-dev babel-plugin-transform-runtime
+    修改`.babelrc`配置文件,增加配置
+    .babelrc
+    ​"plugins": [ "transform-runtime" ] ​
+
+    再来看 babel-polyfill
+    Q: 为什么要集成 babel-polyfill?
+    A: Babel 默认只转换新的 JavaScript 句法（syntax），而不转换新的 API，比如 Iterator、Generator、Set、Maps、Proxy、Reflect、Symbol、Promise 等全局对象，以及一些定义在全局对象上的方法（比如 Object.assign）都不会转码。
+    举例来说，ES6 在 Array 对象上新增了 Array.from 方法。Babel 就不会转码这个方法。如果想让这个方法运行，必须使用 babel-polyfill，为当前环境提供一个垫片。
+    网上很多人说，集成了 transform-runtime 就不用 babel-polyfill 了，其实不然，看看官方怎么说的：
+    NOTE: Instance methods such as "foobar".includes("foo") will not work since that would require modification of existing built-ins (Use babel-polyfill for that).
+    所以，我们还是需要 babel-polyfill 哦。
+    npm install --save-dev babel-polyfill
+    修改 webpack 两个配置文件。
+    webpack.common.config.js
+
+    ```
+    app: [
+        "babel-polyfill",
+        path.join(__dirname, 'src/index.js')
+    ]
+    ```
+
+    webpack.dev.config.js
+
+    ```
+    app: [
+        'babel-polyfill',
+        'react-hot-loader/patch',
+        path.join(__dirname, 'src/index.js')
+    ]
+    ```

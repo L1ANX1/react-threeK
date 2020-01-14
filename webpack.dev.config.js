@@ -6,7 +6,7 @@ const commonConfig = require('./webpack.common.config.js');
 const devConfig = {
   devtool: 'inline-source-map',
   entry: {
-    app: ['react-hot-loader/patch', path.join(__dirname, 'src/index.js')]
+    app: ['babel-polyfill', 'react-hot-loader/patch', path.join(__dirname, 'src/index.js')]
   },
   output: {
     /** 这里本来应该是[chunkhash]的，但是由于[chunkhash]和react-hot-loader不兼容，只能妥协 */
