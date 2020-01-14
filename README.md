@@ -1906,3 +1906,17 @@
     ```
 
     现在你运行代码，然后写个 css，去浏览器审查元素，看看，属性是不是生成了浏览器前缀？
+
+33. redux 模块热替换配置
+    今天突然发现，当修改 reducer 代码的时候，页面会整个刷新，而不是局部刷新（未改动的页面的数据会被清空）。
+    这不行，就去查了 webpack 文档，果然是要配置的。[https://github.com/gaearon/react-hot-loader]
+    代码修改起来也简单,增加一段监听 reducers 变化，并替换的代码。
+
+    src/redux/store.js
+
+    if (module.hot) {
+    module.hot.accept("./reducers", () => {
+    const nextCombineReducers = require("./reducers").default;
+    store.replaceReducer(nextCombineReducers);
+    });
+    }
