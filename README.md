@@ -1920,3 +1920,79 @@
     store.replaceReducer(nextCombineReducers);
     });
     }
+
+34. 模拟 AJAX 数据之 Mock.js
+    Mock.js[http://mockjs.com/]
+    他会做一件事情：拦截 AJAX 请求，返回需要的数据！
+    我们写 AJAX 请求的时候，正常写，Mock.js 会自动拦截的。
+    Mock.js 提供各种随机生成数据。具体可以去官网看~
+    下面我们就在项目中集成咯：
+
+    1. npm install mockjs --save-dev
+    2. 新建 mock 文件夹
+       mkdir mock
+    3. 模拟一个我们之前用到的/api/user 接口
+       cd mock
+       type nul.> mock.js
+       mock/mock.js
+
+    ```
+    import Mock from 'mockjs';
+
+    let Random = Mock.Random;
+
+    Mock.mock('/api/user', {
+        'name': '@cname',
+        'intro': '@word(20)'
+    });
+    ```
+
+    上面代码的意思就是，拦截/api/user，返回随机的一个中文名字，一个 20 个字母的字符串。
+
+    4. 与我们的项目连接。到目前为止，刚才定义的接口和我们的项目还没有关系。
+       先来做，在 src/index.js 里面增加一行代码：
+       src/index.js
+       import '../mock/mock';
+       现在我们删除 dist/api 文件夹，然后修改之间的接口路径，把.json 去掉。
+       rm -rf dist/api
+       src/redux/actions/userInfo.js
+       /_promise: client => client.get(`/api/user.json`)_/
+       promise: client => client.get(`/api/user`)
+       现在我们运行 npm start，到获取用户信息界面，看每次获取用户信息都会变化呀？
+       到这里还没完，我们还要配置：只有在开发坏境下，才引入 mock，在生产坏境，不引入。
+       跟着我做：
+       先给 mock 文件夹加个别名，这个我就不单独介绍了：
+       webpack.common.config.js
+
+    ```
+    resolve: {
+            alias: {
+                ...
+                '@mock': path.join(__dirname, 'mock')
+            }
+        }
+    ```
+
+    webpack.dev.config.js 增加
+
+    ```
+    const webpack = require('webpack');
+    plugins:[
+            new webpack.DefinePlugin({
+                MOCK: true
+            })
+        ]
+    ```
+
+    然后修改 src/index.js 刚才加的那句话改为下面这样
+
+    ```
+    if (MOCK) {
+        require('mock/mock');
+    }
+    ```
+
+    这样，就只会在 npm start 开发模式下，才会应用 mock，如果你不想用，就把 MOCK 改成 false 就好了。
+    哦了，到这里就结束了~回头缕下：
+    我们定义了 mock，在 index.js 引入。
+    mock 的工作就是，拦截 AJAX 请求，返回模拟数据。

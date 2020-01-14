@@ -5,6 +5,10 @@ export const GET_USER_INFO_FAIL = 'userInfor/GET_USER_INFO_FAIL';
 export function getUserInfo() {
   return {
     types: [GET_USER_INFO_REQUEST, GET_USER_INFO_SUCCESS, GET_USER_INFO_FAIL],
-    promise: client => client.get(`http://localhost:8080/api/user.json`)
+    promise: client =>
+      client.get(
+        // (`http://localhost:8080/api/user.json`)
+        `/api/user`
+      )
   };
 }
