@@ -1692,3 +1692,123 @@
 
     module.exports = merge(commonConfig, publicConfig);
     ```
+
+30. 优化目录结构并增加 404 页面
+    现在我们优化下目录结构，把 router 和 nav 分开，新建根组件 App。
+
+    component 改名为 components,因为是复数。。。注意修改引用的地方哦。
+    新建根组件 components/App/App.js
+
+    ```
+    import React, {Component} from 'react';
+
+    import Nav from 'components/Nav/Nav';
+    import getRouter from 'router/router';
+
+    export default class App extends Component {
+        render() {
+            return (
+                <div>
+                    <Nav/>
+                    {getRouter()}
+                </div>
+            )
+        }
+    }
+    ```
+
+    新建 components/Nav/Nav 组件，把 router/router.js 里面的 nav 提出来。
+
+    ```
+    import React, { Component } from 'react';
+    import { Link } from 'react-router-dom';
+
+    export default class Nav extends Component {
+    render() {
+        return (
+        <div>
+            <ul>
+            <li>
+                <Link to="/">首页</Link>
+            </li>
+            <li>
+                <Link to="/page1">Page1</Link>
+            </li>
+            <li>
+                <Link to="/counter">Counter</Link>
+            </li>
+            <li>
+                <Link to="/userinfo">UserInfo</Link>
+            </li>
+            </ul>
+        </div>
+        );
+    }
+    }
+    ```
+
+    新建 components/Loading/Loading 组件,把 router/router.js 里面的 Loading 提出来。
+
+    ```
+    import React, { Component } from 'react';
+
+    export default class Loading extends Component {
+    render() {
+        return <div>page loading...</div>;
+    }
+    }
+    ```
+
+    入口文件 src/index.js 修改
+
+    ```
+    import React from 'react';
+    import ReactDom from 'react-dom';
+    import {AppContainer} from 'react-hot-loader';
+    import {Provider} from 'react-redux';
+    import store from './redux/store';
+    import {BrowserRouter as Router} from 'react-router-dom';
+    import App from 'components/App/App';
+
+    renderWithHotReload(App);
+
+    if (module.hot) {
+        module.hot.accept('components/App/App', () => {
+        const NextApp = require('components/App/App').default;
+        renderWithHotReload(NextApp);
+        });
+    }
+
+    function renderWithHotReload(RootElement) {
+        ReactDom.render(
+        <AppContainer>
+        <Provider store={store}>
+        <Router>
+        <RootElement/>
+        </Router>
+        </Provider>
+        </AppContainer>,
+        document.getElementById('app')
+        )
+    }
+    ```
+
+    新建 pages/NotFound/NotFound 组件。
+
+    ```
+    import React, { Component } from 'react';
+
+    export default class NotFound extends Component {
+    render() {
+        return <div>404</div>;
+    }
+    }
+    ```
+
+    修改 router/router.js，增加 404
+
+    ```
+    import NotFound from 'bundle-loader?lazy&name=notFound!pages/NotFound/NotFound';
+
+    <Route component={createComponent(NotFound)}/>
+    ```
