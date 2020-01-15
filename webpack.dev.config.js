@@ -14,7 +14,23 @@ const devConfig = {
     filename: '[name].[hash].js'
   },
   module: {
-    rules: [{ test: /\.(css|scss)$/, use: ['style-loader', 'css-loader', 'postcss-loader'] }]
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          //  'css-loader?modules&localIdentName=[local]-[hash:base64:5]',
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+              localIdentName: '[path][name]__[local]--[hash:base64:5]'
+            }
+          },
+          'postcss-loader'
+        ]
+      }
+    ]
   },
   devServer: {
     contentBase: path.join(__dirname, './dist'),

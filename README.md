@@ -1996,3 +1996,62 @@
     哦了，到这里就结束了~回头缕下：
     我们定义了 mock，在 index.js 引入。
     mock 的工作就是，拦截 AJAX 请求，返回模拟数据。
+
+35. 使用 CSS Modules
+    替换成 css-loader@0.28.7
+    关于什么是 CSS Modules，我这里不介绍。
+    可以去看阮一峰的文章 CSS Modules 用法教程[http://www.ruanyifeng.com/blog/2016/06/css_modules.html]
+    修改以下几个地方：
+    webpack.dev.config.js
+
+    ```
+    module: {
+            rules: [{
+                test: /\.css$/,
+                use: ["style-loader", "css-loader?modules&localIdentName=[local]-[hash:base64:5]", "postcss-loader"]
+            }]
+        }
+    ```
+
+    webpack.config.js
+
+    ```
+    module: {
+        rules: [{
+            test: /\.css$/,
+            use: ExtractTextPlugin.extract({
+                fallback: "style-loader",
+                use: ["css-loader?modules&localIdentName=[local]-[hash:base64:5]", "postcss-loader"]
+            })
+        }]
+    }
+    ```
+
+    src/pages/Page1/page1.css
+
+    ```
+    .box {
+        border: 1px solid red;
+    }
+    ```
+
+    src/pages/Page1/Page1.js
+
+    ```
+    import React, {Component} from 'react';
+
+    import style from './Page1.css';
+
+    import image from './images/brickpsert.jpg';
+
+    export default class Page1 extends Component {
+        render() {
+            return (
+                <div className={style.box}>
+                    this is page1~
+                    <img src={image}/>
+                </div>
+            )
+        }
+    }
+    ```

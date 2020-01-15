@@ -13,7 +13,20 @@ const publicConfig = {
     rules: [
       {
         test: /\.css$/,
-        use: ExtractTextPlugin.extract({ fallback: 'style-loader', use: ['css-loader', 'postcess-loader'] })
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: [
+            // 'css-loader?modules&localIdentName=[local]-[hash:base64:5]'
+            {
+              loader: 'css-loader',
+              options: {
+                modules: true,
+                localIdentName: '[path][name]__[local]--[hash:base64:5]'
+              }
+            },
+            'postcess-loader'
+          ]
+        })
       }
     ]
   },
