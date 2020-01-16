@@ -2055,3 +2055,51 @@
         }
     }
     ```
+
+36. 使用 json-server 代替 Mock.js
+    json-server 和 Mock.js 一样，都是用来模拟接口数据的。
+    json-server 功能更强大，支持分页，排序，筛选等等，具体的可以去看文档。
+    我们用 json-server 代替之前的 Mock.js。
+    删除 Mock.js 相关代码。
+    一共两处，webpack.dev.config.js,src/index.js
+    npm install --save-dev json-server
+    写个 demo，我们生成虚假数据还是用 mockjs。
+    mock/mock.js
+
+    ```
+    let Mock = require('mockjs');
+
+    var Random = Mock.Random;
+
+    module.exports = function () {
+        var data = {};
+        data.user = {
+            'name': Random.cname(),
+            'intro': Random.word(20)
+        };
+        return data;
+    };
+    ```
+
+    设置启动脚本
+    package.json
+
+    ```
+    "mock": "json-server mock/mock.js --watch --port 8090",
+    "mockdev": "npm run mock & npm start"
+    ```
+
+    webpack.dev.config.js 增加个代理，把我们的 API 请求，代理到 json-server 服务器去。
+    webpack.dev.config.js
+
+    ```
+    devServer: {
+            ...
+            proxy: {
+                        "/api/*": "http://localhost:8090/$1"
+                    }
+        }
+    ```
+
+    哦了，你可以 npm run mockdev 启动项目，然后访问我们之前的用户信息接口，试试啦。
+    问题：windows 不支持命令并行执行&，你可以分开执行，或者使用 npm-run-all

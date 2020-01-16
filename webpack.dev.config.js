@@ -34,10 +34,10 @@ const devConfig = {
   },
   devServer: {
     contentBase: path.join(__dirname, './dist'),
-    historyApiFallback: true
+    historyApiFallback: true,
+    proxy: { '/api/*': 'http://localhost:8090/$1' }
     // host: '0.0.0.0'
-  },
-  plugins: [new webpack.DefinePlugin({ MOCK: true })]
+  }
 };
 
 module.exports = merge({
